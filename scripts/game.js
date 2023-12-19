@@ -77,11 +77,12 @@ function countNeighboringMines(ox,oy) {
 	return m;
 }
 function countNeighboringFlags(ox,oy) {
+	//counts flags + mines
 	let m = 0;
 	for (let x = ox-1; x < ox+2; x++) {
 		for (let y = oy-1; y < oy+2; y++) {
 			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
-				m += (map[x][y] > 1 && map[x][y] < 4);
+				m += ((map[x][y] > 1 && map[x][y] < 4) || map[x][y] === 5);
 			}
 		}
 	} 
@@ -112,7 +113,7 @@ function flag(x,y) {
 }
 function dig(x,y) {
 	if (map[x][y] % 2) { //mine
-		map[x][y] += 4;
+		map[x][y] = 5; //must set not add, since may be 3 or 1
 		cave.poseFgImage(imMine, x,y, 1,1);
 		cave.illuminateFg();
 	} else if (map[x][y] > 3) { //is already dug
