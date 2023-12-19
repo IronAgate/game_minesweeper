@@ -1,5 +1,5 @@
 
-const DBLT = 400; //milliseconds within to check double tap
+const DBLT = 300; //milliseconds within to check double tap
 
 const cave = new Cave("cave", 320,320, 40);
 const inp = new Input(cave.fgShadow);
