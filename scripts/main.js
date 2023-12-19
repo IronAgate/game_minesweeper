@@ -30,7 +30,8 @@ function tap(e) {
 function layMines(notX,notY) {
 	for (let x = 0; x < MAPSIZEX; x++) {
 		for (let y = 0; y < MAPSIZEY; y++) {
-			if (!(x === notX) && !(y === notY)) {
+			//if (!(x === notX) && !(y === notY)) {
+			if ((x > notX + 1 || x < notX -1) || (y>notY+1 || y<notY-1)) {
 				map[x][y].lay();
 			}
 		}
