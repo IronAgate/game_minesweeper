@@ -76,6 +76,17 @@ function countNeighboringMines(ox,oy) {
 	} 
 	return m;
 }
+function countNeighboringFlags(ox,oy) {
+	let m = 0;
+	for (let x = ox-1; x < ox+2; x++) {
+		for (let y = oy-1; y < oy+2; y++) {
+			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
+				m += (map[x][y] > 1 && map[x][y] < 4);
+			}
+		}
+	} 
+	return m;
+}
 function digNeighbors(ox, oy) {
 	for (let x = ox-1; x < ox+2; x++) {
 		for (let y = oy-1; y < oy+2; y++) {
@@ -100,24 +111,25 @@ function flag(x,y) {
 	}
 }
 function dig(x,y) {
-	/*
-	if (map[x][y] > 1 && map[x][y] < 4) { //flagged
-		return;
-	}*/
 	if (map[x][y] % 2) { //mine
 		map[x][y] += 4;
 		cave.poseFgImage(imMine, x,y, 1,1);
-	} else if (map[x][y] > 3) { //dug
-		digNeighbors(x,y);
+		cave.illuminateFg();
+	} else if (map[x][y] > 3) { //is already dug
+		if (countNeighboringFlags(x,y) >= countNeighboringMines(x,y)) {
+			digNeighbors(x,y);
+			cave.illuminateFg();
+		}
 	} else {
 		map[x][y] += 4;
-		const mineCount = countNeighboringMines(x,y);
-		cave.poseFgImage(imDugs[mineCount], x,y, 1,1);
-		if (!mineCount) {
+		const nmines = countNeighboringMines(x,y);
+		cave.poseFgImage(imDugs[nmines], x,y, 1,1);
+		if (!nmines) {
 			digNeighbors(x,y);
 		}
+		cave.illuminateFg();
 	}
-	cave.illuminateFg();
+	
 }
 
 function tap(e) {
