@@ -110,8 +110,15 @@ class Cave {
 		return this.bgFigureContext;
 	}
 	
-	poseBgImage(image) {
+	presentBgImage(image) {
 		this.bgFigureContext.drawImage(image, 0,0, this.X,this.Y);
+	}
+	poseFgImage(image, x,y, sizeX,sizeY) {
+		//expects game coords
+		this.fgFigureContext.drawImage(image
+			, x*this.scale, y*this.scale
+			, sizeX*this.scale, sizeY*this.scale
+		);
 	}
 }
 

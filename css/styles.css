@@ -18,3 +18,10 @@ body {
 	/*border: 1vw solid #dddde4;*/
 	max-height: 90vh;
 }
+
+#temp {
+	margin: 1%;
+	height: 4%;
+	font-size: 2vw;
+	aspect-ratio: 2/1;
+}
