@@ -89,7 +89,7 @@ function digNeighbors(ox, oy) {
 }
 
 function flag(x,y) {
-	if (map[x][y] > 1) { //flagged (or dug but cant be here)
+	if (map[x][y] > 1) { //flagged or dug
 		map[x][y] -= 2;
 		cave.poseFgImage(imUndug, x,y, 1,1);
 		cave.illuminateFg();
@@ -105,6 +105,7 @@ function dig(x,y) {
 		return;
 	}*/
 	if (map[x][y] % 2) { //mine
+		map[x][y] += 4;
 		cave.poseFgImage(imMine, x,y, 1,1);
 	} else if (map[x][y] > 3) { //dug
 		digNeighbors(x,y);
