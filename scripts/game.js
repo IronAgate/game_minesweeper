@@ -130,9 +130,9 @@ function tap(e) {
 		layMines(x,y);
 		dig(x,y);
 		
-		lastTap = now;
+		lastTap = [now, x, y];
 		return;
-	} else if (lastTap + 300 > now) {
+	} else if ((lastTap[0] + 300 > now) && (lastTap[1] == x) && (lastTap[2] == y)) {
 		dig(x,y);
 	} else if (map[x][y] < 4) { //undug
 		flag(x,y);
@@ -140,7 +140,7 @@ function tap(e) {
 		dig(x,y);
 	}
 	
-	lastTap = now;
+	lastTap = [now, x,y];
 }
 
 function startup() {
