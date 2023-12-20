@@ -131,9 +131,7 @@ class Field {
 		
 		for (let x = 0; x < this.sizeX; x++) {
 			for (let y = 0; y < this.sizeY; y++) {
-				if (this.map[x][y] === 1) {
-					this.sheet.pose(IMMINE, x,y, 1,1);
-				} else if (this.map[x][y] === 2) {
+				if (this.map[x][y] === 2) {
 					this.sheet.pose(IMX, x,y, 1,1);
 				}
 			}
