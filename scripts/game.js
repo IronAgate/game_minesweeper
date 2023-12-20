@@ -15,179 +15,174 @@ const [
 
 const DBLT = 250; //milliseconds within to check double tap
 
-const cave = new Cave("cave", 320,320, 40);
-const inp = new Input(cave.fgShadow);
-
-const map = [];
-	//0 undug empty
-	//1 undug mine
-	//2 flagged empty
-	//3 flagged mine
-	//4 dug empty
-	//5 dug mine
-let sizeX = 0;
-let sizeY = 0;
-let mineCount = 0;
-let lastTap = 0;
-let tilesDug = 0;
-
-const sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
-
-function terraform() {
-	//show grid of blank tiles
-	//also used as reset
-	
-	lastTap = 0;
-	tilesDug = 0;
-	
-	for (let x = 0; x < sizeX; x++) {
-		const col = [];
-		for (let y = 0; y < sizeY; y++) {
-			col[y] = 0;
-			sheet.pose(IMUNDUG, x,y, 1,1);
-		}
-		map[x] = col;
-	}
-	cave.illuminateFg();
-}
-function layMines(notX,notY) {
-	//populate map with mines
-	for (let i = 0; i < mineCount; i++) {
-		const r = Math.floor(Math.random() * (sizeX*sizeY));
-		const rx = Math.floor(r/sizeX);
-		const ry = r - rx*sizeX; //err? i mean it works, but might be translating wrong here technically / see spritesheet
+class Field {
+	constructor(sizeX,sizeY, mineCount) {
+		this.lastTap = 0;
+		this.tilesDug = 0;
+		this.sizeX = sizeX;
+		this.sizeY = sizeY;
+		this.mineCount = mineCount;
 		
-		if (
-			(
-				(rx > notX+1 || rx < notX-1) 
-				|| (ry > notY+1 || ry < notY-1) //not near starting tap
-			)
-			&& !(map[rx][ry]) //not mine
-		) {
-			map[rx][ry] = 1;
-		} else {
-			i--; //try again
+		this.sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
+	}
+	terraform() {
+		
+		this.lastTap = 0;
+		this.tilesDug = 0;
+		
+		this.map = [];
+		for (let x = 0; x < this.sizeX; x++) {
+			const col = [];
+			for (let y = 0; y < this.sizeY; y++) {
+				col[y] = 0;
+				this.sheet.pose(IMUNDUG, x,y, 1,1);
+			}
+			this.map[x] = col;
+		}
+		cave.illuminateFg();
+	}
+	layMines(notX,notY) {
+		//populate map with mines
+		for (let i = 0; i < this.mineCount; i++) {
+			const r = Math.floor(Math.random() * (this.sizeX*this.sizeY));
+			const ry = Math.floor(r/this.sizeX);
+			const rx = r - ry*this.sizeX;
+			
+			if (
+				(
+					(rx > notX+1 || rx < notX-1) 
+					|| (ry > notY+1 || ry < notY-1) //not near starting tap
+				)
+				&& !(this.map[rx][ry]) //not mine
+			) {
+				this.map[rx][ry] = 1;
+			} else {
+				i--; //try again
+			}
 		}
 	}
-}
-
-function countNeighboringMines(ox,oy) {
-	let m = 0;
-	for (let x = ox-1; x < ox+2; x++) {
-		for (let y = oy-1; y < oy+2; y++) {
-			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
-				m += map[x][y] % 2;
+	
+	countNeighboringMines(ox,oy) {
+		let m = 0;
+		for (let x = ox-1; x < ox+2; x++) {
+			for (let y = oy-1; y < oy+2; y++) {
+				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY) {
+					m += this.map[x][y] % 2;
+				}
 			}
-		}
-	} 
-	return m;
-}
-function countNeighboringFlags(ox,oy) {
-	//counts flags & revealed mines
-	let m = 0;
-	for (let x = ox-1; x < ox+2; x++) {
-		for (let y = oy-1; y < oy+2; y++) {
-			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) { //doesnt exclude origin
-				m += ((map[x][y] > 1 && map[x][y] < 4) || map[x][y] === 5);
+		} 
+		return m;
+	}
+	countNeighboringFlags(ox,oy) {
+		//counts flags & revealed mines
+		let m = 0;
+		for (let x = ox-1; x < ox+2; x++) {
+			for (let y = oy-1; y < oy+2; y++) {
+				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY) { //doesnt exclude origin
+					m += ((this.map[x][y] > 1 && this.map[x][y] < 4) || this.map[x][y] === 5);
+				}
 			}
-		}
-	} 
-	return m;
-}
-function digNeighbors(ox, oy) {
-	for (let x = ox-1; x < ox+2; x++) {
-		for (let y = oy-1; y < oy+2; y++) {
-			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY && !(x === ox && y === oy)) { //in map bounds and not origin point
-				if (map[x][y] < 2) {//undug unflagged
-					dig(x,y); //beware recursion limit
+		} 
+		return m;
+	}
+	digNeighbors(ox, oy) {
+		for (let x = ox-1; x < ox+2; x++) {
+			for (let y = oy-1; y < oy+2; y++) {
+				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY && !(x === ox && y === oy)) { //in map bounds and not origin point
+					if (this.map[x][y] < 2) {//undug unflagged
+						this.dig(x,y); //beware recursion limit
+					}
 				}
 			}
 		}
 	}
-}
-
-function flag(x,y) {
-	//toggle flags
-	if (map[x][y] > 1) { //flagged or dug
-		map[x][y] -= 2;
-		sheet.pose(IMUNDUG, x,y, 1,1);
-		//cave.illuminateFg();
-	} else {
-		map[x][y] += 2;
-		sheet.pose(IMFLAG, x,y, 1,1);
-		//cave.illuminateFg();
-	}
-}
-function dig(x,y, rootDig=false) {
-	if (map[x][y] % 2) { //mine
-		map[x][y] = 5;
-		sheet.pose(IMMINE, x,y, 1,1);
-	} else if (map[x][y] > 3) { //is already dug
-		if (countNeighboringFlags(x,y) >= countNeighboringMines(x,y)) {
-			digNeighbors(x,y);
-		}
-	} else { //non-mine, unflagged
-		map[x][y] = 4;
-		tilesDug += 1;
-		const nmines = countNeighboringMines(x,y);
-		sheet.pose(nmines, x,y, 1,1);
-		if (!nmines) {
-			digNeighbors(x,y);
+	
+	flag(x,y) {
+		//toggle flags
+		if (this.map[x][y] > 1) { //flagged or dug
+			this.map[x][y] -= 2;
+			this.sheet.pose(IMUNDUG, x,y, 1,1);
+		} else {
+			this.map[x][y] += 2;
+			this.sheet.pose(IMFLAG, x,y, 1,1);
 		}
 	}
-	if (rootDig) {
-		checkComplete();
+	dig(x,y, rootDig=false) {
+		if (this.map[x][y] % 2) { //mine
+			this.map[x][y] = 5;
+			this.sheet.pose(IMMINE, x,y, 1,1);
+		} else if (this.map[x][y] > 3) { //is already dug
+			if (this.countNeighboringFlags(x,y) >= this.countNeighboringMines(x,y)) {
+				this.digNeighbors(x,y);
+			}
+		} else { //non-mine, unflagged
+			this.map[x][y] = 4;
+			this.tilesDug += 1;
+			const nmines = this.countNeighboringMines(x,y);
+			this.sheet.pose(nmines, x,y, 1,1);
+			if (!nmines) {
+				this.digNeighbors(x,y);
+			}
+		}
+		if (rootDig) {
+			this.checkComplete();
+		}
 	}
-}
-
-function checkComplete() {
-	if (tilesDug < sizeX*sizeY - mineCount) {
-		return;
-	}
-	console.log("complete!");
-	for (let x = 0; x < sizeX; x++) {
-		for (let y = 0; y < sizeY; y++) {
-			if (map[x][y] === 4) {
-				sheet.pose(0, x,y, 1,1);
-			} else if (map[x][y] === 3) {
-				sheet.pose(IMUNDUG, x,y, 1,1);
+	
+	checkComplete() {
+		if (this.tilesDug < this.sizeX*this.sizeY - this.mineCount) {
+			return;
+		}
+		console.log("complete!");
+		for (let x = 0; x < this.sizeX; x++) {
+			for (let y = 0; y < this.sizeY; y++) {
+				if (this.map[x][y] === 4) {
+					this.sheet.pose(0, x,y, 1,1);
+				} else if (this.map[x][y] === 3) {
+					this.sheet.pose(IMUNDUG, x,y, 1,1);
+				}
 			}
 		}
 	}
+	
+	tap(e) {
+		
+		let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
+		x = Math.floor(x);
+		y = Math.floor(y);
+		
+		const now = new Date().getTime();
+		if (!this.lastTap) { //first tap
+			this.layMines(x,y);
+			this.dig(x,y, true);
+		} else if ((this.lastTap[0] + DBLT > now) && (this.lastTap[1] === x) && (this.lastTap[2] === y)) { //double tap
+			this.dig(x,y, true);
+		} else if (this.map[x][y] < 4) { //undug
+			this.flag(x,y);
+		} else { //dug, by elimination
+			this.dig(x,y, true);
+		}
+		this.lastTap = [now, x,y];
+		
+		cave.illuminateFg();//push visual changes
+	}
 }
 
-function tap(e) {
-	
-	let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
-	x = Math.floor(x);
-	y = Math.floor(y);
-	
-	const now = new Date().getTime();
-	if (!lastTap) { //first tap
-		layMines(x,y);
-		dig(x,y, true);
-	} else if ((lastTap[0] + DBLT > now) && (lastTap[1] == x) && (lastTap[2] == y)) { //double tap
-		dig(x,y, true);
-	} else if (map[x][y] < 4) { //undug
-		flag(x,y);
-	} else { //dug, by elimination
-		dig(x,y, true);
-	}
-	lastTap = [now, x,y];
-	
-	cave.illuminateFg();//push visual changes
+const cave = new Cave("cave", 320,320, 40);
+const inp = new Input(cave.fgShadow);
+
+const field = new Field(8,8, 10);
+
+function tempTap(e) {
+	field.tap(e);
 }
 
 function startup() {
 	cave.paintWall("#000");
 	
-	sizeX = 8;
-	sizeY = 8;
-	mineCount = 10;
+	field.terraform();
 	
-	terraform();
-	
-	inp.recieveDownAt(tap);
+	inp.recieveDownAt(tempTap);
 }
 
 cave.ignite(startup);
