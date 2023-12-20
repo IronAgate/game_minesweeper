@@ -145,26 +145,24 @@ class Input {
 	}
 }
 
-class Silhouette {
-	/*
-	like a sprite
-	*/
-	constructor(renderer, ctx, imageId, sizeX, sizeY) {
-		//for now, expects image as html img
-		this.image = document.getElementById(imageId);
-		this.renderer = renderer;
-		this.ctx = ctx;
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
+class Spritesheet {
+	constructor(cave, imId, spritesX,spritesY, spriteSize) {
+		this.cave = cave;
+		this.image = document.getElementById("image_sheet");
+		this.sX = spritesX;
+		this.sY = spritesY;
+		this.res = spriteSize;
 	}
-	pose(x,y) {
-		//expects game coords
-		[x,y] = this.renderer.translate_game_to_canvas(x,y);
-		this.ctx.drawImage(this.image
-			, x,y
-			, this.sizeX * this.renderer.scale
-			, this.sizeY * this.renderer.scale
-		);
+	pose(index, x,y, sizeX,sizeY) {
+		const scale = this.cave.scale;
 		
+		this.cave.fgFigureContext.drawImage(
+			this.image, //img
+				(index - Math.floor(index/this.sX)*this.sX) * this.res, //x,y to start clip at:
+				Math.floor(index/this.sX) * this.res,
+			this.res,this.res, //size of clip
+			x*scale, y*scale, //pos to draw to
+			sizeX*scale, sizeY*scale //size to draw to
+		)
 	}
 }

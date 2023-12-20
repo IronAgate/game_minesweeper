@@ -1,4 +1,18 @@
 
+const [
+	IMMINE,
+	IMUNDUG,
+	IMFLAG,
+	IMX,
+	IMVOID
+] = [
+	11,
+	12,
+	13,
+	14,
+	15
+]
+
 const DBLT = 300; //milliseconds within to check double tap
 
 const cave = new Cave("cave", 320,320, 40);
@@ -17,20 +31,7 @@ let mineCount = 0;
 let lastTap = 0;
 let tilesDug = 0;
 
-const imUndug = document.getElementById("image_tile");
-const imFlag = document.getElementById("image_flag");
-const imMine = document.getElementById("image_mine");
-const imDugs = [
-	document.getElementById("image_0"), 
-	document.getElementById("image_1"), 
-	document.getElementById("image_2"), 
-	document.getElementById("image_3"), 
-	document.getElementById("image_4"), 
-	document.getElementById("image_5"), 
-	document.getElementById("image_6"), 
-	document.getElementById("image_7"), 
-	document.getElementById("image_8"), 
-]
+const sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
 
 function terraform() {
 	//show grid of blank tiles
@@ -38,7 +39,7 @@ function terraform() {
 		const col = [];
 		for (let y = 0; y < sizeY; y++) {
 			col[y] = 0;
-			cave.poseFgImage(imUndug, x,y, 1,1);
+			sheet.pose(IMUNDUG, x,y, 1,1);
 		}
 		map[x] = col;
 	}
@@ -49,7 +50,7 @@ function layMines(notX,notY) {
 	for (let i = 0; i < mineCount; i++) {
 		const r = Math.floor(Math.random() * (sizeX*sizeY));
 		const rx = Math.floor(r/sizeX);
-		const ry = r - rx*sizeX;
+		const ry = r - rx*sizeX; //err? i mean it works, but might be translating wrong here technically / see spritesheet
 		
 		if (
 			(
@@ -103,29 +104,27 @@ function digNeighbors(ox, oy) {
 function flag(x,y) {
 	if (map[x][y] > 1) { //flagged or dug
 		map[x][y] -= 2;
-		cave.poseFgImage(imUndug, x,y, 1,1);
+		sheet.pose(IMUNDUG, x,y, 1,1);
 		cave.illuminateFg();
 	} else {
 		map[x][y] += 2;
-		cave.poseFgImage(imFlag, x,y, 1,1);
+		sheet.pose(IMFLAG, x,y, 1,1);
 		cave.illuminateFg();
 	}
 }
 function dig(x,y, rootDig=false) {
 	if (map[x][y] % 2) { //mine
-		map[x][y] = 5; //must set not add, since may be 3 or 1
-		cave.poseFgImage(imMine, x,y, 1,1);
-		//cave.illuminateFg();
+		map[x][y] = 5;
+		sheet.pose(IMMINE, x,y, 1,1);
 	} else if (map[x][y] > 3) { //is already dug
 		if (countNeighboringFlags(x,y) >= countNeighboringMines(x,y)) {
 			digNeighbors(x,y);
-		//	cave.illuminateFg();
 		}
 	} else { //non-mine, unflagged
-		map[x][y] = 4; //again, set
+		map[x][y] = 4;
 		tilesDug += 1;
 		const nmines = countNeighboringMines(x,y);
-		cave.poseFgImage(imDugs[nmines], x,y, 1,1);
+		sheet.pose(nmines, x,y, 1,1);
 		if (!nmines) {
 			digNeighbors(x,y);
 		}
@@ -145,9 +144,9 @@ function checkComplete() {
 	for (let x = 0; x < sizeX; x++) {
 		for (let y = 0; y < sizeY; y++) {
 			if (map[x][y] === 4) {
-				cave.poseFgImage(imDugs[0], x,y, 1,1);
+				sheet.pose(0, x,y, 1,1);
 			} else if (map[x][y] === 3) {
-				cave.poseFgImage(imUndug, x,y, 1,1);
+				sheet.pose(IMUNDUG, x,y, 1,1);
 			}
 		}
 	}
