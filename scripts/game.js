@@ -15,6 +15,7 @@ let sizeX = 0;
 let sizeY = 0;
 let mineCount = 0;
 let lastTap = 0;
+let tilesDug = 0;
 
 const imUndug = document.getElementById("image_tile");
 const imFlag = document.getElementById("image_flag");
@@ -45,7 +46,6 @@ function terraform() {
 }
 function layMines(notX,notY) {
 	//populate map with mines
-	console.log("laying: ", mineCount);
 	for (let i = 0; i < mineCount; i++) {
 		const r = Math.floor(Math.random() * (sizeX*sizeY));
 		const rx = Math.floor(r/sizeX);
@@ -111,29 +111,52 @@ function flag(x,y) {
 		cave.illuminateFg();
 	}
 }
-function dig(x,y) {
+function dig(x,y, rootDig=false) {
 	if (map[x][y] % 2) { //mine
 		map[x][y] = 5; //must set not add, since may be 3 or 1
 		cave.poseFgImage(imMine, x,y, 1,1);
-		cave.illuminateFg();
+		//cave.illuminateFg();
 	} else if (map[x][y] > 3) { //is already dug
 		if (countNeighboringFlags(x,y) >= countNeighboringMines(x,y)) {
 			digNeighbors(x,y);
-			cave.illuminateFg();
+		//	cave.illuminateFg();
 		}
-	} else {
-		map[x][y] += 4;
+	} else { //non-mine, unflagged
+		map[x][y] = 4; //again, set
+		tilesDug += 1;
 		const nmines = countNeighboringMines(x,y);
 		cave.poseFgImage(imDugs[nmines], x,y, 1,1);
 		if (!nmines) {
 			digNeighbors(x,y);
 		}
+	}
+	if (rootDig) {
+		checkComplete();
 		cave.illuminateFg();
 	}
 	
 }
 
+function checkComplete() {
+	if (tilesDug < sizeX*sizeY - mineCount) {
+		return;
+	}
+	console.log("complete!");
+	for (let x = 0; x < sizeX; x++) {
+		for (let y = 0; y < sizeY; y++) {
+			if (map[x][y] === 4) {
+				cave.poseFgImage(imDugs[0], x,y, 1,1);
+			} else if (map[x][y] === 3) {
+				cave.poseFgImage(imUndug, x,y, 1,1);
+			}
+		}
+	}
+}
+
 function tap(e) {
+	
+	
+	
 	let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
 	x = Math.floor(x);
 	y = Math.floor(y);
@@ -142,16 +165,16 @@ function tap(e) {
 	
 	if (!lastTap) {
 		layMines(x,y);
-		dig(x,y);
+		dig(x,y, true);
 		
 		lastTap = [now, x, y];
 		return;
 	} else if ((lastTap[0] + 300 > now) && (lastTap[1] == x) && (lastTap[2] == y)) {
-		dig(x,y);
+		dig(x,y, true);
 	} else if (map[x][y] < 4) { //undug
 		flag(x,y);
 	} else { 
-		dig(x,y);
+		dig(x,y, true);
 	}
 	
 	lastTap = [now, x,y];
@@ -171,6 +194,7 @@ function startup() {
 
 function reset() {
 	lastTap = 0;
+	tilesDug = 0;
 	
 	terraform();
 }
