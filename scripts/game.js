@@ -83,7 +83,7 @@ function countNeighboringMines(ox,oy) {
 	return m;
 }
 function countNeighboringFlags(ox,oy) {
-	//counts flags + mines
+	//counts flags & revealed mines
 	let m = 0;
 	for (let x = ox-1; x < ox+2; x++) {
 		for (let y = oy-1; y < oy+2; y++) {
@@ -107,6 +107,7 @@ function digNeighbors(ox, oy) {
 }
 
 function flag(x,y) {
+	//toggle flags
 	if (map[x][y] > 1) { //flagged or dug
 		map[x][y] -= 2;
 		sheet.pose(IMUNDUG, x,y, 1,1);
