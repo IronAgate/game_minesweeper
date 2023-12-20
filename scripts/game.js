@@ -13,7 +13,7 @@ const [
 	15
 ]
 
-const DBLT = 300; //milliseconds within to check double tap
+const DBLT = 250; //milliseconds within to check double tap
 
 const cave = new Cave("cave", 320,320, 40);
 const inp = new Input(cave.fgShadow);
@@ -35,6 +35,11 @@ const sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
 
 function terraform() {
 	//show grid of blank tiles
+	//also used as reset
+	
+	lastTap = 0;
+	tilesDug = 0;
+	
 	for (let x = 0; x < sizeX; x++) {
 		const col = [];
 		for (let y = 0; y < sizeY; y++) {
@@ -82,7 +87,7 @@ function countNeighboringFlags(ox,oy) {
 	let m = 0;
 	for (let x = ox-1; x < ox+2; x++) {
 		for (let y = oy-1; y < oy+2; y++) {
-			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
+			if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) { //doesnt exclude origin
 				m += ((map[x][y] > 1 && map[x][y] < 4) || map[x][y] === 5);
 			}
 		}
@@ -105,11 +110,11 @@ function flag(x,y) {
 	if (map[x][y] > 1) { //flagged or dug
 		map[x][y] -= 2;
 		sheet.pose(IMUNDUG, x,y, 1,1);
-		cave.illuminateFg();
+		//cave.illuminateFg();
 	} else {
 		map[x][y] += 2;
 		sheet.pose(IMFLAG, x,y, 1,1);
-		cave.illuminateFg();
+		//cave.illuminateFg();
 	}
 }
 function dig(x,y, rootDig=false) {
@@ -131,9 +136,7 @@ function dig(x,y, rootDig=false) {
 	}
 	if (rootDig) {
 		checkComplete();
-		cave.illuminateFg();
 	}
-	
 }
 
 function checkComplete() {
@@ -154,29 +157,24 @@ function checkComplete() {
 
 function tap(e) {
 	
-	
-	
 	let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
 	x = Math.floor(x);
 	y = Math.floor(y);
 	
 	const now = new Date().getTime();
-	
-	if (!lastTap) {
+	if (!lastTap) { //first tap
 		layMines(x,y);
 		dig(x,y, true);
-		
-		lastTap = [now, x, y];
-		return;
-	} else if ((lastTap[0] + 300 > now) && (lastTap[1] == x) && (lastTap[2] == y)) {
+	} else if ((lastTap[0] + DBLT > now) && (lastTap[1] == x) && (lastTap[2] == y)) { //double tap
 		dig(x,y, true);
 	} else if (map[x][y] < 4) { //undug
 		flag(x,y);
-	} else { 
+	} else { //dug, by elimination
 		dig(x,y, true);
 	}
-	
 	lastTap = [now, x,y];
+	
+	cave.illuminateFg();//push visual changes
 }
 
 function startup() {
@@ -189,13 +187,6 @@ function startup() {
 	terraform();
 	
 	inp.recieveDownAt(tap);
-}
-
-function reset() {
-	lastTap = 0;
-	tilesDug = 0;
-	
-	terraform();
 }
 
 cave.ignite(startup);
