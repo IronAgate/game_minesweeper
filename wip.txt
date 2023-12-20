@@ -1,26 +1,24 @@
 
-modes
-	easy / already done
-	medium
-	hard / these 2 follow classic minesweeper
-	mega / massive map you scroll around
-	# probably need to turn map into object
-
-settings
-	neighbor-digging safety on/off
-	insta-death on/off
-	tilesets/palettes
-
 menus
-	start menu / choose mode
-	settings menu / from start menu
-	help / from game or start / redirect?
+	>play
+		>easy
+		>normal
+		>hard
+		>mega
+		*back
+	>settings
+		>neighbor-digging safety on/off
+		>insta-death on/off
+		>palette [cycle]
+		*done
+	>help
+		?link redirect?
+
 
 proper end screen
 	for victory
 	for loss, if insta-death
+	time at completion - time at layMines
 
-messiness
-	control structure for digging is split btwn dig() and touch()
-		is there a better way to organize this?
-	actually, control structure in general for actions is pretty messy
+rework neighbors
+	instead of iterating through separate times, do once per
