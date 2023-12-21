@@ -1,20 +1,25 @@
 
-const cave = new Cave("cave", 320,320, 40);
+const cave = new Cave("cave", 10*40,10*40, 40);
 const inp = new Input(cave.fgShadow);
-
-const field = new Field(8,8, 10);
+//13,27:75 / 9,20:35 / 14,14:35 / 8,8:10
+const field = new Field(8,8, 10, 1,1);
 
 function tempTap(e) {
 	let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
 	x = Math.floor(x);
 	y = Math.floor(y);
 	
-	field.trigger(x,y);
+	if (
+		(x >= field.x && x < field.x+field.sizeX)
+		&& (y >= field.y && y < field.y+field.sizeY)
+	) {
+		field.trigger(x,y);
+	}
 }
 
 function startup() {
 	cave.paintWall("#000");
-	
+	cave.wall.requestFullscreen();
 	field.terraform();
 	
 	inp.recieveDownAt(tempTap);

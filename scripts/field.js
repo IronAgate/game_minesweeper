@@ -14,9 +14,11 @@ const [
 ]
 
 class Field {
-	constructor(sizeX,sizeY, mineCount) {
+	constructor(sizeX,sizeY, mineCount, x=0, y=0) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
+		this.x = x;
+		this.y = y;
 		this.mineCount = mineCount;
 		
 		this.sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
@@ -33,7 +35,7 @@ class Field {
 			const col = [];
 			for (let y = 0; y < this.sizeY; y++) {
 				col[y] = 0;
-				this.sheet.pose(IMUNDUG, x,y, 1,1);
+				this.pose(IMUNDUG, x,y);
 			}
 			this.map[x] = col;
 		}
@@ -99,10 +101,10 @@ class Field {
 		//toggle flags
 		if (this.map[x][y] > 1) { //flagged or dug
 			this.map[x][y] -= 2;
-			this.sheet.pose(IMUNDUG, x,y, 1,1);
+			this.pose(IMUNDUG, x,y);
 		} else {
 			this.map[x][y] += 2;
-			this.sheet.pose(IMFLAG, x,y, 1,1);
+			this.pose(IMFLAG, x,y);
 		}
 	}
 	dig(x,y, rootDig=false) {
@@ -116,7 +118,7 @@ class Field {
 			this.map[x][y] = 4;
 			this.tilesDug += 1;
 			const nmines = this.countNeighboringMines(x,y);
-			this.sheet.pose(nmines, x,y, 1,1);
+			this.pose(nmines, x,y);
 			if (!nmines) {
 				this.digNeighbors(x,y);
 			}
@@ -127,12 +129,12 @@ class Field {
 	}
 	boom(mx,my) {
 		this.map[mx][my] = 5;
-		this.sheet.pose(IMMINE, mx,my, 1,1);
+		this.pose(IMMINE, mx,my);
 		
 		for (let x = 0; x < this.sizeX; x++) {
 			for (let y = 0; y < this.sizeY; y++) {
 				if (this.map[x][y] === 2) {
-					this.sheet.pose(IMX, x,y, 1,1);
+					this.pose(IMX, x,y);
 				}
 			}
 		}
@@ -147,15 +149,17 @@ class Field {
 		for (let x = 0; x < this.sizeX; x++) {
 			for (let y = 0; y < this.sizeY; y++) {
 				if (this.map[x][y] === 4) {
-					this.sheet.pose(0, x,y, 1,1);
+					this.pose(0, x,y);
 				} else if (this.map[x][y] === 3) {
-					this.sheet.pose(IMUNDUG, x,y, 1,1);
+					this.pose(IMUNDUG, x,y);
 				}
 			}
 		}
 	}
 	
 	trigger(x,y) {
+		x -=this.x;
+		y -= this.y;
 		if (this.blocktrigger) {
 			return;
 		}
@@ -173,5 +177,9 @@ class Field {
 		this.lastTap = [now, x,y];
 		
 		cave.illuminateFg();//push visual changes
+	}
+	
+	pose(spritenum, x,y) {
+		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
 	}
 }
