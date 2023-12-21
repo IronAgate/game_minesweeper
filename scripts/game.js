@@ -19,7 +19,7 @@ function tempTap(e) {
 
 function startup() {
 	cave.paintWall("#000");
-	cave.wall.requestFullscreen();
+	//cave.wall.requestFullscreen();
 	field.terraform();
 	
 	inp.recieveDownAt(tempTap);
