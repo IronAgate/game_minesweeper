@@ -25,6 +25,8 @@ class Field {
 	}
 	terraform() {
 		
+		this.bar = new FieldBar(this.x,this.y-2, this.sizeX, this.mineCount, this.sheet);
+		
 		this.blocktrigger = 0;
 		
 		this.lastTap = 0;
@@ -102,10 +104,15 @@ class Field {
 		if (this.map[x][y] > 1) { //flagged or dug
 			this.map[x][y] -= 2;
 			this.pose(IMUNDUG, x,y);
+			
+			this.bar.flags += 1;
 		} else {
 			this.map[x][y] += 2;
 			this.pose(IMFLAG, x,y);
+			
+			this.bar.flags -= 1;
 		}
+		this.bar.poseCount();
 	}
 	dig(x,y, rootDig=false) {
 		if (this.map[x][y] % 2) { //mine
@@ -114,12 +121,18 @@ class Field {
 			if (this.countNeighboringFlags(x,y) >= this.countNeighboringMines(x,y)) {
 				this.digNeighbors(x,y);
 			}
-		} else { //non-mine, unflagged
+		} else { 
+			if (this.map[x][y] > 1 && this.map[x][y] < 4) {
+				this.bar.flags += 1;
+				this.bar.poseCount();
+			}
 			this.map[x][y] = 4;
 			this.tilesDug += 1;
 			const nmines = this.countNeighboringMines(x,y);
-			this.pose(nmines, x,y);
-			if (!nmines) {
+			if (nmines) {
+				this.pose(nmines, x,y);
+			} else {
+				this.pose(10, x,y);
 				this.digNeighbors(x,y);
 			}
 		}
@@ -149,7 +162,7 @@ class Field {
 		for (let x = 0; x < this.sizeX; x++) {
 			for (let y = 0; y < this.sizeY; y++) {
 				if (this.map[x][y] === 4) {
-					this.pose(0, x,y);
+					this.pose(10, x,y);
 				} else if (this.map[x][y] === 3) {
 					this.pose(IMUNDUG, x,y);
 				}
@@ -179,6 +192,38 @@ class Field {
 		cave.illuminateFg();//push visual changes
 	}
 	
+	pose(spritenum, x,y) {
+		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
+	}
+}
+
+class FieldBar {
+	constructor(x,y, width, flags, spritesheet) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.flags = flags;
+		this.sheet = spritesheet;
+		
+		this.pose(IMUNDUG, 0,0);
+		this.pose(IMFLAG, 1,0);
+		for (let i =4; i < this.width; i++) {
+			this.pose(IMUNDUG, i, 0);
+		}
+		
+		this.poseCount();
+		
+	}
+	poseCount() {
+		const fs = String(this.flags);
+		if (fs.length === 1) {
+			this.pose(0, 2,0);
+			this.pose(fs, 3,0);
+		} else {
+			this.pose(fs[0], 2,0);
+			this.pose(fs[1], 3,0);
+		}
+	}
 	pose(spritenum, x,y) {
 		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
 	}
