@@ -18,7 +18,8 @@ function tempTap(e) {
 }
 
 function startup() {
-	cave.paintWall("#000");
+	cave.paintWall("#324056");
+	//557185 / 324056
 	//cave.wall.requestFullscreen();
 	field.terraform();
 	

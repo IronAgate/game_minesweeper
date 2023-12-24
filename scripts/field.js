@@ -215,6 +215,9 @@ class FieldBar {
 		
 	}
 	poseCount() {
+		if (this.flags < 0) {
+			return;
+		}
 		const fs = String(this.flags);
 		if (fs.length === 1) {
 			this.pose(0, 2,0);
