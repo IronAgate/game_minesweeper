@@ -94,7 +94,7 @@ class Cave {
 		this.fgShadowContext.drawImage(this.fgFigure, 0,0);
 	}*/
 	illuminateFg() {
-		this.fgShadowContext.clearRect(0,0, this.x,this.y);
+		this.fgShadowContext.clearRect(0,0, this.x,this.y); //err: capitalize x/y | doing will break current game rendering
 		this.fgShadowContext.drawImage(this.fgFigure, 0,0);
 		this.fgFigureContext.clearRect(0,0, this.x,this.y);
 	}

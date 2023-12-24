@@ -9,18 +9,54 @@ class Waiter {
 		this.cave = cave;
 		
 		this.inp = inp;
-		inp.recieveUpAt(this.onTap);
+		const me = this;
+		this.tempF = function(e) {
+			const [x,y] = me.inp.translate_to_canv(e.clientX, e.clientY);
 		
-		this.display("home");
-	}
-	onTap(e) {
+			const contents = me.ms[me.current].contents;
 		
+			for (let i = 0; i < contents.length; i++) {
+				
+				if (
+					(x >= contents[i].x)
+					&& (x <= contents[i].endX)
+					&& (y >= contents[i].y)
+					&& (y <= contents[i].endY)
+				) {
+					console.log("=:", contents[i].text);
+					me.trigger(contents[i]);
+					break;
+				}
+			}
+		}
+		inp.recieveUpAt(this.tempF);
+		
+		this.display("play");
 	}
+	/*onTap(e) {
+		const [x,y] = this.inp.translate_to_canv(e.clientX, e.clientY);
+		
+		const contents = this.ms[this.current].contents;
+		
+		for (let i = 0; i < contents.length; i++) {
+			if (
+				(x >= contents[i].x)
+				&& (x <= contents[i].endX)
+				&& (y >= contents[i].y)
+				&& (y <= contents[i].endY)
+			) {
+				console.log(contents[i].text);
+				break;
+			}
+		}
+		
+	}*/
 	display(menuName) {
 		const contents = this.ms[menuName].contents
+		this.current = menuName;
 		
-		this.cave.poseBg().fillStyle = this.ms["style"].bgColor;
-		this.cave.poseBg().fillRect(0,0, this.cave.X,this.cave.Y);
+		this.cave.poseFg().fillStyle = this.ms["style"].bgColor;
+		this.cave.poseFg().fillRect(0,0, this.cave.X,this.cave.Y);
 		
 		let startX = this.cave.X * 0.05;
 		let width = this.cave.X - startX*2;
@@ -30,6 +66,11 @@ class Waiter {
 		let spacing = ((this.cave.Y - startY*2) * 0.05) / contents.length
 		
 		for (let i = 0; i < contents.length; i++) {
+			
+			contents[i].x = startX;
+			contents[i].y = startY + (depth + spacing) * i;
+			contents[i].endX = startX + width;
+			contents[i].endY = (startY + (depth + spacing) * i) + depth;
 			
 			this.cave.poseFg().fillStyle = this.ms["style"].fgColor;
 			this.cave.poseFg().fillRect(
@@ -42,14 +83,25 @@ class Waiter {
 			//this.cave.poseFg().textAlign = "center";
 			this.cave.poseFg().font = String(depth*0.50) + "px monospace";
 			this.cave.poseFg().fillText(
-				this.ms[menuName].contents[i].text
+				contents[i].text
 				, startX * 1.50
 				, (startY + (depth + spacing) * i) + depth*0.75
 				, width
 			);
 		}
-		this.cave.illuminateBg();
+		//this.cave.illuminateBg();
 		this.cave.illuminateFg();
+	}
+	trigger(btn) {
+		
+		if (btn.type === 0) { //navigate
+			this.display(btn.menu);
+		} else if (btn.type === 1) { //call func
+			eval(btn.f + '()'); //todo: find alternative
+		} else if (btn.type === 2) {//open link
+			//btn.link
+		}
+		
 	}
 }
 
