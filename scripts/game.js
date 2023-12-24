@@ -2,7 +2,7 @@
 const cave = new Cave("cave", 10*40,12*40, 40);
 const inp = new Input(cave.fgShadow);
 //13,27:75 / 9,20:35 / 14,14:35 / 8,8:10
-const field = new Field(8,8, 10, 1,3);
+//const field = new Field(8,8, 10, 1,3);
 
 function tempTap(e) {
 	let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
@@ -18,12 +18,17 @@ function tempTap(e) {
 }
 
 function startup() {
-	cave.paintWall("#324056");
-	//557185 / 324056
+	//cave.paintWall("#324056");
 	//cave.wall.requestFullscreen();
-	field.terraform();
+	//field.terraform();
 	
-	inp.recieveDownAt(tempTap);
+	//inp.recieveDownAt(tempTap);
+	
+	const m = new Waiter(cave, inp);
+	
+	
+	cave.illuminateFg();
+	
 }
 
 cave.ignite(startup);

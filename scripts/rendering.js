@@ -135,6 +135,13 @@ class Input {
 		this.root.addEventListener("mouseup", f);
 	}
 	
+	unbindDownFrom(f) {
+		this.root.removeEventListener("mousedown", f);
+	}
+	unbindUpFrom(f) {
+		this.root.removeEventListener("mouseup", f);
+	}
+	
 	translate_to_canv(x,y) {
 		const rect = this.root.getBoundingClientRect();
 		//canvCoords = (clientPos - elementPos) * (elementWidth / elementCssWidth)

@@ -1,0 +1,80 @@
+{
+
+"style": {
+	"bgColor": "#324056"
+	, "fgColor": "#557185"
+	, "textColor": "#ffd079"
+}
+
+, "home": {
+	
+	
+	"contents": [
+		{
+			"text": "play"
+			, "type": 0
+			, "menu": "play"
+		}, {
+			"text": "settings"
+			, "type": 0
+			, "menu": "settings"
+		}, {
+			"text": "help"
+			, "type": 2
+			, "link": ""
+		}
+	]
+}
+, "play": {
+	
+	
+	"contents": [
+		{
+			"text": "beginner"
+			, "type": 1
+			, "f": "playBeginner"
+		}, {
+			"text": "medium"
+			, "type": 1
+			, "f": "playMedium"
+		}, {
+			"text": "hard"
+			, "type": 1
+			, "f": "playHard"
+		}, {
+			"text": "mega"
+			, "type": 1
+			, "f": "playMega"
+		}, {
+			"text": "back"
+			, "type": 0
+			, "menu": "home"
+		}
+	]
+}
+, "settings": {
+	
+	
+	"contents": [
+		{
+			"text": "safety"
+			, "type": 1
+			, "f": "settingsSafety"
+		}, {
+			"text": "death"
+			, "type": 1
+			, "f": "settingsDeath"
+		}, {
+			"text": "palette"
+			, "type": 1
+			, "f": "settingsPalette"
+		}, {
+			"text": "done"
+			, "type": 0
+			, "menu":"home"
+		}
+	]
+}
+
+
+}

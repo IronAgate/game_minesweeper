@@ -5,14 +5,21 @@ menus
 		>normal
 		>hard
 		>mega
-		*back
+		>back
 	>settings
 		>neighbor-digging safety on/off
 		>insta-death on/off
 		>palette [cycle]
-		*done
+		>done
 	>help
 		?link redirect?
+
+
+menuTree obj will handle the menu objs
+	recieves inputs and redirects to current menu
+	handles switching btwn menus
+	
+	?how to format storing menus
 
 
 proper end screen
@@ -22,3 +29,7 @@ proper end screen
 
 rework neighbors
 	instead of iterating through separate times, do once per
+
+misc messiness
+
+	rename 'resX/Y' to width/depth in renderer
