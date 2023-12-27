@@ -1,26 +1,5 @@
 
-menus
-	>play
-		>easy
-		>normal
-		>hard
-		>mega
-		>back
-	>settings
-		>neighbor-digging safety on/off
-		>insta-death on/off
-		>palette [cycle]
-		>done
-	>help
-		?link redirect?
-
-
-menuTree obj will handle the menu objs
-	recieves inputs and redirects to current menu
-	handles switching btwn menus
-	
-	?how to format storing menus
-
+polish/organize/finish menu
 
 proper end screen
 	for victory

@@ -1,10 +1,11 @@
 
 
-class Waiter {
-	constructor(cave, inp) {
+class Chef {
+	//builds/manages menu from json menu
+	constructor(cave, inp, waiter = new Waiter()) {
 		
 		this.ms = JSON.parse(tempMenuStr);
-		
+		this.waiter = waiter;
 		
 		this.cave = cave;
 		
@@ -23,7 +24,6 @@ class Waiter {
 					&& (y >= contents[i].y)
 					&& (y <= contents[i].endY)
 				) {
-					console.log("=:", contents[i].text);
 					me.trigger(contents[i]);
 					break;
 				}
@@ -31,7 +31,7 @@ class Waiter {
 		}
 		inp.recieveUpAt(this.tempF);
 		
-		this.display("play");
+		this.display("home");
 	}
 	/*onTap(e) {
 		const [x,y] = this.inp.translate_to_canv(e.clientX, e.clientY);
@@ -45,7 +45,7 @@ class Waiter {
 				&& (y >= contents[i].y)
 				&& (y <= contents[i].endY)
 			) {
-				console.log(contents[i].text);
+				this.trigger(contents[i]);
 				break;
 			}
 		}
@@ -61,7 +61,7 @@ class Waiter {
 		let startX = this.cave.X * 0.05;
 		let width = this.cave.X - startX*2;
 		
-		let startY = this.cave.Y * 0.10;
+		let startY = this.cave.Y * 0.05;
 		let depth = ((this.cave.Y-startY*2) * 0.95) / contents.length
 		let spacing = ((this.cave.Y - startY*2) * 0.05) / contents.length
 		
@@ -89,7 +89,6 @@ class Waiter {
 				, width
 			);
 		}
-		//this.cave.illuminateBg();
 		this.cave.illuminateFg();
 	}
 	trigger(btn) {
@@ -97,7 +96,7 @@ class Waiter {
 		if (btn.type === 0) { //navigate
 			this.display(btn.menu);
 		} else if (btn.type === 1) { //call func
-			eval(btn.f + '()'); //todo: find alternative
+			eval("this.waiter." + btn.f + '()'); //todo: find alternative
 		} else if (btn.type === 2) {//open link
 			//btn.link
 		}
@@ -155,7 +154,7 @@ const tempMenuStr = `
 			, "type": 1
 			, "f": "playMega"
 		}, {
-			"text": "back"
+			"text": "<- back"
 			, "type": 0
 			, "menu": "home"
 		}

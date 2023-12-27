@@ -18,21 +18,9 @@ function tempTap(e) {
 	}
 }
 
-function playBeginner() {
-	field = new Field(8,8, 10, 1,3);
-	
-	cave.poseFg().fillStyle = "#324056";
-	cave.poseFg().fillRect(0,0, cave.X,cave.Y);
-	cave.illuminateFg();
-	
-	//cave.paintWall("#324056");
-	field.terraform();
-	
-	inp.unbindUpFrom(m.tempF);
-	inp.recieveUpAt(tempTap);
-}
 
-const m = new Waiter(cave, inp); //temp global
+
+const chef = new Chef(cave, inp); //temp global
 
 function startup() {
 	//cave.paintWall("#324056");
@@ -40,8 +28,6 @@ function startup() {
 	//field.terraform();
 	
 	//inp.recieveDownAt(tempTap);
-	
-
 	
 	
 	cave.illuminateFg();
