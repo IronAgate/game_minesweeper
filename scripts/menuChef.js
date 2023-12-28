@@ -96,7 +96,7 @@ class Chef {
 		if (btn.type === 0) { //navigate
 			this.display(btn.menu);
 		} else if (btn.type === 1) { //call func
-			eval("this.waiter." + btn.f + '()'); //todo: find alternative
+			eval("this.waiter." + btn.f); //todo: find alternative
 		} else if (btn.type === 2) {//open link
 			//btn.link
 		}
@@ -140,19 +140,19 @@ const tempMenuStr = `
 		{
 			"text": "beginner"
 			, "type": 1
-			, "f": "playBeginner"
+			, "f": "play(8,8,10)"
 		}, {
 			"text": "medium"
 			, "type": 1
-			, "f": "playMedium"
+			, "f": "play(9,20,35)"
 		}, {
 			"text": "hard"
 			, "type": 1
-			, "f": "playHard"
+			, "f": "play(13,27, 75)"
 		}, {
 			"text": "mega"
 			, "type": 1
-			, "f": "playMega"
+			, "f": "playMega()"
 		}, {
 			"text": "<- back"
 			, "type": 0
@@ -167,15 +167,15 @@ const tempMenuStr = `
 		{
 			"text": "safety"
 			, "type": 1
-			, "f": "settingsSafety"
+			, "f": "settingsSafety()"
 		}, {
 			"text": "death"
 			, "type": 1
-			, "f": "settingsDeath"
+			, "f": "settingsDeath()"
 		}, {
 			"text": "palette"
 			, "type": 1
-			, "f": "settingsPalette"
+			, "f": "settingsPalette()"
 		}, {
 			"text": "done"
 			, "type": 0
