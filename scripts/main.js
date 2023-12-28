@@ -1,24 +1,23 @@
 
-const cave = new Cave("cave", 10*40,12*40, 40);
+const cave = new Cave("cave", 400,400);
 const inp = new Input(cave.fgShadow);
-//13,27:75 / 9,20:35 / 14,14:35 / 8,8:10
-
+const chef = new Chef(cave, inp, tempMenuStr); //temp global
 let game;
+
 function middlemanTap(e) {
 	game.tap(e);
 }
 
-
-
-const chef = new Chef(cave, inp); //temp global
+function tempReset() {
+	game = undefined;
+	inp.unbindUpFrom(middlemanTap); //todo: put in Game
+	
+	chef.start("play");
+}
 
 function startup() {
-	//cave.paintWall("#324056");
-	//cave.wall.requestFullscreen();
-	//field.terraform();
 	
-	//inp.recieveDownAt(tempTap);
-	
+	chef.start();
 	
 	cave.illuminateFg();
 	

@@ -1,4 +1,4 @@
-const DBLT = 250; //milliseconds within to check double tap
+const DBLT = 300; //milliseconds within to check double tap
 const [
 	IMBLANK,
 	IMMINE,
@@ -16,39 +16,54 @@ const [
 ]
 
 class Game {
-	constructor(width,depth, mineCount) {
+	constructor(cave, fieldWidth,fieldDepth, mineCount) {
+		
+		this.cave = cave;
+		cave.poseFg().fillStyle = "#324056";
+		cave.poseFg().fillRect(0,0, cave.X,cave.Y);
+		
+		const pad = 0.5;
+		//temp: assume y is larger dimension
+		const width = fieldWidth;
+		const depth = fieldDepth + 1 + pad;
+		let newscale = cave.Y / (depth + pad*2);
+		cave.scale = newscale;
+		//todo: move this^ to a cave.fitY(depth) method
+		
+		let barPosY = pad;
+		let fieldPosY = barPosY + 1 + pad;
+		let fieldPosX = ((cave.X/cave.scale) - width)/2;
+		
 		
 		const sheet = new Spritesheet(cave, "image_sheet", 4,4, 8);
-		
 		this.field = new Field(
 			this,sheet,
-			1,3,
-			width,depth,
+			fieldPosX,fieldPosY,
+			fieldWidth,fieldDepth,
 			mineCount
 		);
 		this.bar = new FieldBar(
 			sheet,
-			1,1,
-			width
+			fieldPosX,barPosY,
+			fieldWidth
 		);
-		
-		//logic for scaling to canvas
 	}
 	start() {
 		this.bar.terraform();
 		this.field.terraform();
+		
+		cave.illuminateFg();
+	}
+	reset() {
+		this.field.terraform();
+		
+		cave.illuminateFg();
 	}
 	tap(e) {
 		let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));
-		x = Math.floor(x);
-		y = Math.floor(y);
 		
-		const field = this.field;
-		if (
-			(x >= field.x && x < field.x+field.sizeX)
-			&& (y >= field.y && y < field.y+field.sizeY)
-		) {
-			field.trigger(x,y);
+		if (this.field.collides(x,y)) {
+			this.field.trigger(x,y);
 		}
 	}
 	updateFlags(flagCount) {
@@ -56,14 +71,27 @@ class Game {
 	}
 }
 
-class Field {
-	constructor(game, sheet, x,y, sizeX,sizeY, mineCount) {
-		this.game = game;
-		this.sheet = sheet;
+class GameObj {
+	constructor(x,y, width,depth) {
 		this.x = x;
 		this.y = y;
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
+		this.width = width;
+		this.depth = depth;
+	}
+	collides(x,y) {
+		return (
+			(x >= this.x && x < this.x+this.width)
+			&& (y >= this.y && y < this.y+this.depth)	
+		)
+	}
+	
+}
+
+class Field extends GameObj {
+	constructor(game, sheet, x,y, width,depth, mineCount) {
+		super(x,y, width,depth);
+		this.game = game;
+		this.sheet = sheet;
 		this.mineCount = mineCount;
 	}
 	terraform() {
@@ -77,22 +105,21 @@ class Field {
 		this.tilesDug = 0;
 		
 		this.map = [];
-		for (let x = 0; x < this.sizeX; x++) {
+		for (let x = 0; x < this.width; x++) {
 			const col = [];
-			for (let y = 0; y < this.sizeY; y++) {
+			for (let y = 0; y < this.depth; y++) {
 				col[y] = 0;
 				this.pose(IMUNDUG, x,y);
 			}
 			this.map[x] = col;
 		}
-		cave.illuminateFg();
 	}
 	layMines(notX,notY) {
 		//populate map with mines
 		for (let i = 0; i < this.mineCount; i++) {
-			const r = Math.floor(Math.random() * (this.sizeX*this.sizeY));
-			const ry = Math.floor(r/this.sizeX);
-			const rx = r - ry*this.sizeX;
+			const r = Math.floor(Math.random() * (this.width*this.depth));
+			const ry = Math.floor(r/this.width);
+			const rx = r - ry*this.width;
 			
 			if (
 				(
@@ -112,7 +139,7 @@ class Field {
 		let m = 0;
 		for (let x = ox-1; x < ox+2; x++) {
 			for (let y = oy-1; y < oy+2; y++) {
-				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY) {
+				if (x >= 0 && x < this.width && y >= 0 && y < this.depth) {
 					m += this.map[x][y] % 2;
 				}
 			}
@@ -124,7 +151,7 @@ class Field {
 		let m = 0;
 		for (let x = ox-1; x < ox+2; x++) {
 			for (let y = oy-1; y < oy+2; y++) {
-				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY) { //doesnt exclude origin
+				if (x >= 0 && x < this.width && y >= 0 && y < this.depth) { //doesnt exclude origin
 					m += ((this.map[x][y] > 1 && this.map[x][y] < 4) || this.map[x][y] === 5);
 				}
 			}
@@ -134,7 +161,7 @@ class Field {
 	digNeighbors(ox, oy) {
 		for (let x = ox-1; x < ox+2; x++) {
 			for (let y = oy-1; y < oy+2; y++) {
-				if (x >= 0 && x < this.sizeX && y >= 0 && y < this.sizeY && !(x === ox && y === oy)) { //in map bounds and not origin point
+				if (x >= 0 && x < this.width && y >= 0 && y < this.depth && !(x === ox && y === oy)) { //in map bounds and not origin point
 					if (this.map[x][y] < 2) {//undug unflagged
 						this.dig(x,y); //beware recursion limit
 					}
@@ -188,8 +215,8 @@ class Field {
 		this.map[mx][my] = 5;
 		this.pose(IMMINE, mx,my);
 		
-		for (let x = 0; x < this.sizeX; x++) {
-			for (let y = 0; y < this.sizeY; y++) {
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.depth; y++) {
 				if (this.map[x][y] === 2) {
 					this.pose(IMX, x,y);
 				}
@@ -198,13 +225,13 @@ class Field {
 		this.blocktrigger = 1;
 	}
 	checkComplete() {
-		if (this.tilesDug < this.sizeX*this.sizeY - this.mineCount) {
+		if (this.tilesDug < this.width*this.depth - this.mineCount) {
 			return;
 		}
 		console.log("complete!");
 		this.blocktrigger = 1;
-		for (let x = 0; x < this.sizeX; x++) {
-			for (let y = 0; y < this.sizeY; y++) {
+		for (let x = 0; x < this.width; x++) {
+			for (let y = 0; y < this.depth; y++) {
 				if (this.map[x][y] === 4) {
 					this.pose(IMBLANK, x,y);
 				} else if (this.map[x][y] === 3) {
@@ -215,8 +242,9 @@ class Field {
 	}
 	
 	trigger(x,y) {
-		x -=this.x;
-		y -= this.y;
+		x = Math.floor(x - this.x);
+		y = Math.floor(y - this.y);
+		
 		if (this.blocktrigger) {
 			return;
 		}
@@ -239,15 +267,13 @@ class Field {
 	pose(spritenum, x,y) {
 		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
 	}
+	
 }
 
-class FieldBar {
+class FieldBar extends GameObj{
 	constructor(sheet, x,y, width) {
+		super(x,y, width,1);
 		this.sheet = sheet;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		
 		
 	}
 	terraform() {
@@ -270,7 +296,9 @@ class FieldBar {
 			this.pose(fs[1], 3,0);
 		}
 	}
+	
 	pose(spritenum, x,y) {
 		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
 	}
+	
 }

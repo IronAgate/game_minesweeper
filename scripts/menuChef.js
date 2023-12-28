@@ -2,10 +2,10 @@
 
 class Chef {
 	//builds/manages menu from json menu
-	constructor(cave, inp, waiter = new Waiter()) {
+	constructor(cave, inp, menuStr) {
 		
-		this.ms = JSON.parse(tempMenuStr);
-		this.waiter = waiter;
+		this.ms = JSON.parse(menuStr);
+		this.waiter = new Waiter();
 		
 		this.cave = cave;
 		
@@ -29,9 +29,6 @@ class Chef {
 				}
 			}
 		}
-		inp.recieveUpAt(this.tempF);
-		
-		this.display("home");
 	}
 	/*onTap(e) {
 		const [x,y] = this.inp.translate_to_canv(e.clientX, e.clientY);
@@ -51,6 +48,10 @@ class Chef {
 		}
 		
 	}*/
+	start(home = "home") {
+		this.inp.recieveUpAt(this.tempF);
+		this.display(home);
+	}
 	display(menuName) {
 		const contents = this.ms[menuName].contents
 		this.current = menuName;
@@ -144,11 +145,11 @@ const tempMenuStr = `
 		}, {
 			"text": "medium"
 			, "type": 1
-			, "f": "play(9,20,35)"
+			, "f": "play(14,14,35)"
 		}, {
 			"text": "hard"
 			, "type": 1
-			, "f": "play(13,27, 75)"
+			, "f": "play(19,19,75)"
 		}, {
 			"text": "mega"
 			, "type": 1

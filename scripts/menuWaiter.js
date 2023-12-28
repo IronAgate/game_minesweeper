@@ -2,19 +2,12 @@
 class Waiter {
 	//holds specialized functions called by menu btns
 	play(x,y, m) {
-		//field = new Field(x,y, m, 1,3);
-		//todo: rescale game on canvas to fit other field dimensions
-		
-		game = new Game(x,y,m);
-		
-		cave.poseFg().fillStyle = "#324056";
-		cave.poseFg().fillRect(0,0, cave.X,cave.Y);
-		cave.illuminateFg();
-		
-		game.start();
-		
-		inp.unbindUpFrom(chef.tempF);
+		//13,27:75 / 9,20:35 / 14,14:35 / 8,8:10
+		inp.unbindUpFrom(chef.tempF); //todo: put in chef
 		inp.recieveUpAt(middlemanTap);
+		
+		game = new Game(cave, x,y,m);
+		game.start();
 	}
 	
 }
