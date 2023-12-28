@@ -1,11 +1,13 @@
 const DBLT = 250; //milliseconds within to check double tap
 const [
+	IMBLANK,
 	IMMINE,
 	IMUNDUG,
 	IMFLAG,
 	IMX,
 	IMVOID
 ] = [
+	10,
 	11,
 	12,
 	13,
@@ -63,11 +65,11 @@ class Field {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.mineCount = mineCount;
-		this.flags = mineCount;
 	}
 	terraform() {
 		
-		this.game.updateFlags(this.mineCount);
+		this.flags = this.mineCount;
+		this.game.updateFlags(this.flags);
 		
 		this.blocktrigger = 0;
 		
@@ -165,8 +167,8 @@ class Field {
 			}
 		} else { 
 			if (this.map[x][y] > 1 && this.map[x][y] < 4) {
-				this.bar.flags += 1;
-				this.bar.poseCount();
+				this.flags += 1;
+				this.game.updateFlags(this.flags);
 			}
 			this.map[x][y] = 4;
 			this.tilesDug += 1;
@@ -174,7 +176,7 @@ class Field {
 			if (nmines) {
 				this.pose(nmines, x,y);
 			} else {
-				this.pose(10, x,y);
+				this.pose(IMBLANK, x,y);
 				this.digNeighbors(x,y);
 			}
 		}
@@ -204,7 +206,7 @@ class Field {
 		for (let x = 0; x < this.sizeX; x++) {
 			for (let y = 0; y < this.sizeY; y++) {
 				if (this.map[x][y] === 4) {
-					this.pose(10, x,y);
+					this.pose(IMBLANK, x,y);
 				} else if (this.map[x][y] === 3) {
 					this.pose(IMUNDUG, x,y);
 				}
