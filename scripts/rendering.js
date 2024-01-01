@@ -32,15 +32,18 @@ class Cave {
 			sh.style.position = "absolute"; //layering
 			wall.appendChild(sh);
 			
+		//	sh.style.imageRendering = "pixelated";
 			
 			const shcx = sh.getContext("2d");
 			shcx.imageSmoothingEnabled = false;
 			shcx.webkitImageSmoothingEnabled = false;
 			shcx.mozImageSmoothingEnabled = false;
 			
-			const fig = new OffscreenCanvas(resX, resY);
+			const fig = new OffscreenCanvas(resX,resY);
+		//	fig.imageRendering = 'pixelated';
 			//const fig = document.createElement("canvas");
 			const figcx = fig.getContext("2d");
+			//console.log(figcx.canvas === fig); // todo: these are equal
 			figcx.imageSmoothingEnabled = false;
 			figcx.webkitImageSmoothingEnabled = false;
 			figcx.mozImageSmoothingEnabled = false;
@@ -94,14 +97,14 @@ class Cave {
 		this.fgShadowContext.drawImage(this.fgFigure, 0,0);
 	}*/
 	illuminateFg() {
-		this.fgShadowContext.clearRect(0,0, this.x,this.y); //err: capitalize x/y | doing will break current game rendering
-		this.fgShadowContext.drawImage(this.fgFigure, 0,0);
-		this.fgFigureContext.clearRect(0,0, this.x,this.y);
+		//this.fgShadowContext.clearRect(0,0, this.x,this.y); //err: capitalize x/y | doing will break current game rendering
+		this.fgShadowContext.drawImage(this.fgFigure, 0,0, this.X,this.Y);
+		//this.fgFigureContext.clearRect(0,0, this.x,this.y);
 	}
 	illuminateBg() {
-		this.bgShadowContext.clearRect(0,0, this.x,this.y);
-		this.bgShadowContext.drawImage(this.bgFigure, 0,0);
-		this.bgFigureContext.clearRect(0,0, this.x,this.y);
+		//this.bgShadowContext.clearRect(0,0, this.x,this.y);
+		this.bgShadowContext.drawImage(this.bgFigure, 0,0, this.X,this.Y);
+		//this.bgFigureContext.clearRect(0,0, this.x,this.y);
 	}
 	poseFg() {
 		return this.fgFigureContext;
@@ -168,8 +171,19 @@ class Spritesheet {
 				(index - Math.floor(index/this.sX)*this.sX) * this.res, //x,y to start clip at:
 				Math.floor(index/this.sX) * this.res,
 			this.res,this.res, //size of clip
-			x*scale, y*scale, //pos to draw to
-			sizeX*scale, sizeY*scale //size to draw to
+			Math.round(x*scale), Math.round(y*scale), //pos to draw to
+			Math.round(sizeX*scale), Math.round(sizeY*scale) //size to draw to
 		)
 	}
+	//source of bleeding:
+	//https://stackoverflow.com/questions/60684359/how-can-i-prevent-texture-bleeding-when-using-drawimage-to-draw-multiple-images
+/*
+prolly need to rework rendering so
+ draw to a canvas-holding obj of some unique size,
+ then push that canv to the final canv all at once
+ so it is all scaled together
+ 
+or examine source code of stack overflow example so
+ can figure out how their fix works
+*/
 }
