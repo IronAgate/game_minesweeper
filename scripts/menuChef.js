@@ -124,10 +124,6 @@ const tempMenuStr = `
 			, "type": 0
 			, "menu": "play"
 		}, {
-			"text": "settings"
-			, "type": 0
-			, "menu": "settings"
-		}, {
 			"text": "help"
 			, "type": 2
 			, "link": ""
@@ -161,6 +157,10 @@ const tempMenuStr = `
 		}
 	]
 }
+
+}
+`
+/*
 , "settings": {
 	
 	
@@ -188,3 +188,4 @@ const tempMenuStr = `
 
 }
 `
+*/

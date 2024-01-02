@@ -20,6 +20,7 @@ function startup() {
 	chef.start();
 	
 	cave.illuminateFg();
+	//cave.wall.requestFullscreen();
 	
 }
 

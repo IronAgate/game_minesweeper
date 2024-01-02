@@ -52,12 +52,12 @@ class Game {
 		this.bar.terraform();
 		this.field.terraform();
 		
-		cave.illuminateFg();
+		this.cave.illuminateFg();
 	}
 	reset() {
 		this.field.terraform();
 		
-		cave.illuminateFg();
+		this.cave.illuminateFg();
 	}
 	tap(e) {
 		let [x,y] = cave.translate_canvas_to_game(...inp.translate_to_canv(e.clientX, e.clientY));

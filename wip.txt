@@ -1,14 +1,26 @@
 
-polish/organize/finish menu
+finish menu
 
 proper end screen
 	for victory
 	for loss, if insta-death
 	time at completion - time at layMines
+	
+settings
 
-rework neighbors
-	instead of iterating through separate times, do once per
+organize rendering code
+	rework layers? Arent rly using it
+
+fullscreen
 
 misc messiness
 
 	rename 'resX/Y' to width/depth in renderer
+	squares should iterate through neighbors only once, where applicable,
+	 rather than multiple times
+
+mega mode
+
+
+other details
+	palettes, applying to menu too
