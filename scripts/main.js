@@ -1,5 +1,5 @@
 
-const cave = new Cave("cave", 400,400);
+const cave = new Cave("cave", 500,500);
 const inp = new Input(cave.fgShadow);
 const chef = new Chef(cave, inp, tempMenuStr); //temp global
 let game;

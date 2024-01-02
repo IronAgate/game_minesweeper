@@ -147,7 +147,6 @@ class Input {
 	
 	translate_to_canv(x,y) {
 		const rect = this.root.getBoundingClientRect();
-		//canvCoords = (clientPos - elementPos) * (elementWidth / elementCssWidth)
 		return [
 			(x - rect.left) * (this.root.width / this.root.offsetWidth)
 			, (y- rect.top) * (this.root.height / this.root.offsetHeight)
@@ -166,24 +165,39 @@ class Spritesheet {
 	pose(index, x,y, sizeX,sizeY) {
 		const scale = this.cave.scale;
 		
+		
+		
 		this.cave.fgFigureContext.drawImage(
 			this.image, //img
 				(index - Math.floor(index/this.sX)*this.sX) * this.res, //x,y to start clip at:
 				Math.floor(index/this.sX) * this.res,
 			this.res,this.res, //size of clip
-			Math.round(x*scale), Math.round(y*scale), //pos to draw to
-			Math.round(sizeX*scale), Math.round(sizeY*scale) //size to draw to
+			Math.floor(x*scale),
+				Math.floor(y*scale), //pos to draw to
+			Math.ceil(sizeX*scale),
+				Math.ceil(sizeY*scale) //size to draw to
 		)
+		
+		/*
+		
+		drawing to canvas at float pos from spritesheet
+		 causes bleeding / differs per browser
+		from what i understand, this is unintendes but
+		 accepted
+		
+		I used floor() and ceil() to prevent floats and
+		 therefore the bleeding
+		Using ceil on size prevents pixel gaps
+		unfortunately, the tiles are warped along
+		 certain lines since canvas pixel space isnt necessarily
+		 the right proportions for the tileset.
+		unsure if there is a good fix for this other than
+		 resizing the canvas or pushing into padding
+		 precision, so will leave for now.
+		
+		https://stackoverflow.com/questions/60684359/how-can-i-prevent-texture-bleeding-when-using-drawimage-to-draw-multiple-images
+		
+		*/
+		
 	}
-	//source of bleeding:
-	//https://stackoverflow.com/questions/60684359/how-can-i-prevent-texture-bleeding-when-using-drawimage-to-draw-multiple-images
-/*
-prolly need to rework rendering so
- draw to a canvas-holding obj of some unique size,
- then push that canv to the final canv all at once
- so it is all scaled together
- 
-or examine source code of stack overflow example so
- can figure out how their fix works
-*/
 }
