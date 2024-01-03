@@ -5,7 +5,7 @@ const [
 	IMUNDUG,
 	IMFLAG,
 	IMX,
-	IMVOID
+	IMBURGER
 ] = [
 	10,
 	11,
@@ -13,7 +13,7 @@ const [
 	13,
 	14,
 	15
-]
+] //todo: ?move to constant object?
 
 class Game {
 	constructor(cave, fieldWidth,fieldDepth, mineCount) {
@@ -64,6 +64,8 @@ class Game {
 		
 		if (this.field.collides(x,y)) {
 			this.field.trigger(x,y);
+		} else if (this.bar.collides(x,y)) {
+			this.bar.trigger(x,y);
 		}
 	}
 	updateFlags(flagCount) {
@@ -83,6 +85,9 @@ class GameObj {
 			(x >= this.x && x < this.x+this.width)
 			&& (y >= this.y && y < this.y+this.depth)	
 		)
+	}
+	localize(x,y) {
+		return [ Math.floor(x - this.x), Math.floor(y - this.y) ]
 	}
 	
 }
@@ -241,9 +246,10 @@ class Field extends GameObj {
 		}
 	}
 	
-	trigger(x,y) {
-		x = Math.floor(x - this.x);
-		y = Math.floor(y - this.y);
+	trigger(gx,gy) {
+		//x = Math.floor(x - this.x);
+		//y = Math.floor(y - this.y);
+		const [x,y] = this.localize(gx,gy);
 		
 		if (this.blocktrigger) {
 			return;
@@ -277,11 +283,12 @@ class FieldBar extends GameObj{
 		
 	}
 	terraform() {
-		this.pose(IMUNDUG, 0,0);
-		this.pose(IMFLAG, 1,0);
+		this.pose(IMUNDUG, 0);
+		this.pose(IMFLAG, 1);
 		for (let i = 4; i < this.width; i++) {
-			this.pose(IMUNDUG, i, 0);
+			this.pose(IMUNDUG, i);
 		}
+		this.pose(IMBURGER, this.width-2);
 	}
 	poseCount(flags) {
 		if (flags < 0) {
@@ -297,8 +304,22 @@ class FieldBar extends GameObj{
 		}
 	}
 	
-	pose(spritenum, x,y) {
+	trigger(gx,gy) {
+		const [x,y] = this.localize(gx,gy);
+		
+		if (x === this.width-2) {
+			tempReset();
+		}
+	}
+	
+	pose(spritenum, x,y=0) {
 		this.sheet.pose(spritenum, this.x+x,this.y+y, 1,1);
 	}
 	
+}
+
+class OverlayMenu extends GameObj {
+	constructor() {
+		super(x,y, width,depth);
+	}
 }

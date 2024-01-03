@@ -176,7 +176,7 @@ class Spritesheet {
 				Math.floor(y*scale), //pos to draw to
 			Math.ceil(sizeX*scale),
 				Math.ceil(sizeY*scale) //size to draw to
-		)
+		) //move essence to main rendering class?
 		
 		/*
 		
