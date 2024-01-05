@@ -2,18 +2,16 @@
 
 class Chef {
 	//builds/manages menu from json menu
-	constructor(cave, inp, menuStr) {
+	constructor(renderController, menuStr) {
 		
 		this.ms = JSON.parse(menuStr);
 		this.waiter = new Waiter();
 		
-		this.cave = cave;
+		this.renderController = renderController;
 		
-		this.inp = inp;
 		const me = this;
-		this.tempF = function(e) {
-			const [x,y] = me.inp.translate_to_canv(e.clientX, e.clientY);
-		
+		this.tempF = function([x,y]) {
+			
 			const contents = me.ms[me.current].contents;
 		
 			for (let i = 0; i < contents.length; i++) {
@@ -48,23 +46,28 @@ class Chef {
 		}
 		
 	}*/
-	start(home = "home") {
-		this.inp.recieveUpAt(this.tempF);
+	ignite(home = "home") {
+		this.renderController.input.recieveUp(this.tempF);
 		this.display(home);
 	}
 	display(menuName) {
 		const contents = this.ms[menuName].contents
 		this.current = menuName;
 		
-		this.cave.poseFg().fillStyle = this.ms["style"].bgColor;
-		this.cave.poseFg().fillRect(0,0, this.cave.X,this.cave.Y);
+		const frame = new OffscreenEisel(this.renderController.width,this.renderController.depth);
 		
-		let startX = this.cave.X * 0.05;
-		let width = this.cave.X - startX*2;
+		frame.setColor(this.ms["style"].bgColor);
+		frame.clear();
 		
-		let startY = this.cave.Y * 0.05;
-		let depth = ((this.cave.Y-startY*2) * 0.95) / contents.length
-		let spacing = ((this.cave.Y - startY*2) * 0.05) / contents.length
+		const w = frame.getWidth();
+		const d = frame.getDepth();
+		
+		let startX = w * 0.05;
+		let width =  w - startX*2;
+		
+		let startY = d * 0.05;
+		let depth = ((d-startY*2) * 0.95) / contents.length
+		let spacing = ((d - startY*2) * 0.05) / contents.length
 		
 		for (let i = 0; i < contents.length; i++) {
 			
@@ -73,24 +76,23 @@ class Chef {
 			contents[i].endX = startX + width;
 			contents[i].endY = (startY + (depth + spacing) * i) + depth;
 			
-			this.cave.poseFg().fillStyle = this.ms["style"].fgColor;
-			this.cave.poseFg().fillRect(
+			frame.setColor(this.ms["style"].fgColor);
+			frame.paintRectangle(
 				startX
 				, startY + (depth + spacing) * i
 				, width
 				, depth
 			);
-			this.cave.poseFg().fillStyle = this.ms["style"].textColor;
-			//this.cave.poseFg().textAlign = "center";
-			this.cave.poseFg().font = String(depth*0.50) + "px monospace";
-			this.cave.poseFg().fillText(
+			frame.setColor(this.ms["style"].textColor);
+			frame.setFont(depth*0.5);
+			frame.write(
 				contents[i].text
 				, startX * 1.50
 				, (startY + (depth + spacing) * i) + depth*0.75
 				, width
 			);
 		}
-		this.cave.illuminateFg();
+		this.renderController.presentFull(frame);
 	}
 	trigger(btn) {
 		

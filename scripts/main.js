@@ -27,14 +27,12 @@ function startup() {
 cave.ignite(startup);
 */
 
-const renderController = new RenderController("game", 500,500);
-
-function startup() {
+function startup(renderController) {	
+	//renderController.artist.setColor("#ffaaef");
+	//renderController.artist.clear();
 	
-	
-	renderController.artist.setColor("#ffaaef");
-	renderController.artist.clear();
+	new Chef(renderController, tempMenuStr).ignite();
 	
 }
 
-renderController.start(startup);
+new RenderController("game", 500,500).ignite(startup);
