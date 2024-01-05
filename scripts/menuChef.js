@@ -59,7 +59,7 @@ class Chef {
 				, width
 			);
 		}
-		this.renderController.presentFull(frame);
+		frame.presentFill(this.renderController.eisel);
 	}
 	onUp([x,y]) {
 		const contents = this.ms[this.current].contents;

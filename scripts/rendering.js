@@ -172,6 +172,23 @@ class Eisel { //abstract canvas handler
 			width
 		);
 	}
+	
+	//inter-eisel
+	present(destinationEisel, x,y, width,depth) {
+		destinationEisel.paintImage(
+			this.canvas,
+			x,y,
+			width,depth
+		);
+	}
+	presentFill(destinationEisel) {
+		destinationEisel.context.drawImage(
+			this.canvas,
+			0,0,
+			destinationEisel.canvas.width,
+				destinationEisel.canvas.height
+		);
+	}
 }
 class DisplayEisel extends Eisel { //abstract
 	constructor(width, depth) {
@@ -210,17 +227,16 @@ class Spritesheet {
 		}
 	}
 	paintSprite(index, eisel, dx,dy, dwidth,dheight) {
-		index *= spriteSize;
-		const sy = Math.trunc(index / image.width);
-		const sx = index - sy*image.width;
-		
+		index *= this.spriteSize;
+		const sx = index % this.image.width
+		const sy = Math.floor(index / this.image.width) * this.spriteSize;
 		eisel.paintFromRegion(
 			this.image,
 			sx,sy,
-			spriteSize,spriteSize,
+			this.spriteSize,this.spriteSize,
 			dx,dy,
 			dwidth,dheight
 		);
-		
+		//err: indexes incorrectly. math is wrong :(
 	}
 }
