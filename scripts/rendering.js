@@ -47,6 +47,9 @@ class RenderController {
 			}
 		this.div.appendChild(btn);
 	}
+	createFullOffscreenEisel() {
+		return new OffscreenEisel(this.width,this.depth);
+	}
 	presentFull(offscreenEisel) {
 		this.eisel.paintImage(
 			offscreenEisel.canvas,
@@ -70,25 +73,25 @@ class InputHandler {
 	}
 	
 	//subject to change for proper touch events
-	recieveDown(f) {
+	recieveDown(object) {
 		const i = this;
 		this.downCall = function(e) {
-			f(i.translateClientApp(e.clientX,e.clientY));
+			object.onDown(i.translateClientApp(e.clientX,e.clientY));
 		}
 		this.rootEisel.canvas.addEventListener("mousedown", this.downCall);
 	}
-	recieveUp(f) {
+	recieveUp(object) {
 		const i = this;
 		this.upCall = function(e) {
-			f(i.translateClientApp(e.clientX,e.clientY));
+			object.onUp(i.translateClientApp(e.clientX,e.clientY));
 		}
 		this.rootEisel.canvas.addEventListener("mouseup", this.upCall);
 	}
-	unlinkDown(f) {
+	forgetDown() {
 		this.rootEisel.canvas.removeEventListener("mousedown", this.downCall);
 		this.downCall = null;
 	}
-	unlinkUp(f) {
+	forgetUp() {
 		this.rootEisel.canvas.removeEventListener("mouseup", this.upCall);
 		this.upCall = null;
 	}

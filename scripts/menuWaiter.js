@@ -1,13 +1,14 @@
 
 class Waiter {
-	//holds specialized functions called by menu btns
+	constructor(renderController) {
+		this.renderController = renderController;
+	}
 	play(x,y, m) {
 		//13,27:75 / 9,20:35 / 14,14:35 / 8,8:10
-		inp.unbindUpFrom(chef.tempF); //todo: put in chef
-		inp.recieveUpAt(middlemanTap);
+		this.renderController.input.forgetUp();
 		
-		game = new Game(cave, x,y,m);
-		game.start();
+		new GameController(this.renderController, x,y,m);
+		//todo: recieve inp in game.start
 	}
 	
 }

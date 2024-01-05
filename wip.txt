@@ -1,5 +1,6 @@
 
-finish menu
+organize
+
 
 proper end screen
 	for victory
@@ -7,9 +8,6 @@ proper end screen
 	time at completion - time at layMines
 	
 settings
-
-organize rendering code
-	rework layers? Arent rly using it
 
 fullscreen
 

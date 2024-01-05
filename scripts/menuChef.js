@@ -4,50 +4,17 @@ class Chef {
 	//builds/manages menu from json menu
 	constructor(renderController, menuStr) {
 		
-		this.ms = JSON.parse(menuStr);
-		this.waiter = new Waiter();
-		
 		this.renderController = renderController;
 		
+		this.ms = JSON.parse(menuStr);
+		this.waiter = new Waiter(renderController);
+		
 		const me = this;
-		this.tempF = function([x,y]) {
 			
-			const contents = me.ms[me.current].contents;
-		
-			for (let i = 0; i < contents.length; i++) {
-				
-				if (
-					(x >= contents[i].x)
-					&& (x <= contents[i].endX)
-					&& (y >= contents[i].y)
-					&& (y <= contents[i].endY)
-				) {
-					me.trigger(contents[i]);
-					break;
-				}
-			}
-		}
+			
 	}
-	/*onTap(e) {
-		const [x,y] = this.inp.translate_to_canv(e.clientX, e.clientY);
-		
-		const contents = this.ms[this.current].contents;
-		
-		for (let i = 0; i < contents.length; i++) {
-			if (
-				(x >= contents[i].x)
-				&& (x <= contents[i].endX)
-				&& (y >= contents[i].y)
-				&& (y <= contents[i].endY)
-			) {
-				this.trigger(contents[i]);
-				break;
-			}
-		}
-		
-	}*/
 	ignite(home = "home") {
-		this.renderController.input.recieveUp(this.tempF);
+		this.renderController.input.recieveUp(this);
 		this.display(home);
 	}
 	display(menuName) {
@@ -93,6 +60,22 @@ class Chef {
 			);
 		}
 		this.renderController.presentFull(frame);
+	}
+	onUp([x,y]) {
+		const contents = this.ms[this.current].contents;
+		
+		for (let i = 0; i < contents.length; i++) {
+				
+			if (
+				(x >= contents[i].x)
+				&& (x <= contents[i].endX)
+				&& (y >= contents[i].y)
+				&& (y <= contents[i].endY)
+			) {
+				this.trigger(contents[i]);
+				break;
+			}
+		}
 	}
 	trigger(btn) {
 		
