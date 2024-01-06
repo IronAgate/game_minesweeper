@@ -47,15 +47,8 @@ class RenderController {
 			}
 		this.div.appendChild(btn);
 	}
-	createFullOffscreenEisel() {
+	createFullEisel() {
 		return new OffscreenEisel(this.width,this.depth);
-	}
-	presentFull(offscreenEisel) {
-		this.eisel.paintImage(
-			offscreenEisel.canvas,
-			0,0,
-			this.width,this.depth
-		);
 	}
 }
 
@@ -65,11 +58,11 @@ class InputHandler {
 	}
 	translateClientApp(x,y) {
 		const rect = this.rootEisel.canvas.getBoundingClientRect();
-		const [canvx,canvy] = [ //translate client to canv first
+		[x,y] = [ //translate client to canv
 			(x - rect.left) * (this.rootEisel.canvas.width / this.rootEisel.canvas.offsetWidth)
 			, (y- rect.top) * (this.rootEisel.canvas.height / this.rootEisel.canvas.offsetHeight)
 		];
-		return this.rootEisel.translateCanvasApp(canvx, canvy);
+		return this.rootEisel.translateCanvasApp(x,y);
 	}
 	
 	//subject to change for proper touch events
@@ -112,6 +105,13 @@ class Eisel { //abstract canvas handler
 	setScale(newScale) {
 		this.scale = newScale;
 	}
+	scaleFit(x,y) {
+		if (Math.abs(x - this.canvas.width) >= Math.abs(y - this.canvas.height)) {
+			this.scale = this.canvas.width / x;
+		} else {
+			this.scale = this.canvas.height / y;
+		}
+	}
 	getWidth() {
 		return this.canvas.width;
 	}
@@ -138,8 +138,9 @@ class Eisel { //abstract canvas handler
 	//images
 	paintFromRegion(image, sx,sy, swidth,sheight, dx,dy, dwidth,dheight) {
 		[dx,dy] = this.translateAppCanvas(dx,dy);
-		[dwidth,dheight] = this.translateAppCanvas(dwidth,dheight);
-		
+		//[dwidth,dheight] = this.translateAppCanvas(dwidth,dheight);
+		dwidth = Math.ceil(dwidth * this.scale);
+		dheight = Math.ceil(dheight * this.scale);
 		this.context.drawImage(
 			image,
 			sx,sy,
@@ -148,9 +149,23 @@ class Eisel { //abstract canvas handler
 			dwidth,dheight
 		);			
 	}
+	paintSprite(index, sheet, spriteSize, dx,dy, dwidth = 1,dheight = 1) {
+		index *= spriteSize;
+		const sx = index % sheet.width
+		const sy = Math.floor(index / sheet.width) * spriteSize;
+		this.paintFromRegion(
+			sheet,
+			sx,sy,
+			spriteSize,spriteSize,
+			dx,dy,
+			dwidth,dheight
+		);
+	}
 	paintImage(image, x,y, width,height) {
 		[x,y] = this.translateAppCanvas(x,y);
-		[width,height] = this.translateAppCanvas(width,height);
+		//[width,height] = this.translateAppCanvas(width,height);
+		width = Math.ceil(width * this.scale);
+		height = Math.ceil(height * this.scale);
 		this.context.drawImage(
 			image,
 			x,y,
@@ -212,31 +227,5 @@ class OffscreenEisel extends Eisel {
 		super(
 			new OffscreenCanvas(width, depth)
 		);
-	}
-}
-
-
-class Spritesheet {
-	constructor(image, spriteSize) {
-		this.image = image;
-		this.spriteSize = spriteSize;
-		if (!Number.isInteger(image.width/spriteSize)) {
-			throw new Error("Spritesheet spritesize and width are incompatible!");
-		} else if (!Number.isInteger(image.height/spriteSize)) {
-			throw new Error("Spritesheet spritesize and height are incompatible!");
-		}
-	}
-	paintSprite(index, eisel, dx,dy, dwidth,dheight) {
-		index *= this.spriteSize;
-		const sx = index % this.image.width
-		const sy = Math.floor(index / this.image.width) * this.spriteSize;
-		eisel.paintFromRegion(
-			this.image,
-			sx,sy,
-			this.spriteSize,this.spriteSize,
-			dx,dy,
-			dwidth,dheight
-		);
-		//err: indexes incorrectly. math is wrong :(
 	}
 }
