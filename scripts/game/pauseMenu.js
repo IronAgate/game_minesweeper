@@ -1,11 +1,14 @@
 class PauseMenu {
 	constructor(controller) {
-
+		
+		controller.eisel.color("rgba(0,0,0,0.5)");
+		controller.eisel.clear();
+		
 		this.panel = new GamePanel(
 			controller,
-			0,0,
-			controller.eisel.getWidth(),
-				controller.eisel.getHeight()
+			100,100,
+			300,//controller.eisel.getWidth(),
+				300//controller.eisel.getHeight()
 		);
 		this.panel.content = this;
 		
@@ -32,13 +35,13 @@ class PauseMenu {
 		this.panel.eisel.color(BGC);
 		this.panel.eisel.clear();
 		
-		this.drawButton("home", this.home);
 		this.drawButton("reset", this.reset);
+		this.drawButton("home", this.home);
 		this.drawButton("resume", this.resume);
 		
 		this.panel.present();
 	}
-	drawButton(text) {
+	drawButton(text, f) {
 		
 		const e = this.panel.eisel;
 		

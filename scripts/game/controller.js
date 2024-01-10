@@ -71,7 +71,11 @@ class GameController {
 		//waits for response to draw frames / doesnt redraw frames constantly like most games
 		
 		if (this.paused) {
-			this.pauseMenu.panel.trigger(x,y);
+			if (this.pauseMenu.panel.collides(x,y)) {
+				this.pauseMenu.panel.trigger(x,y);
+			} else {
+				this.resume();
+			}
 		} else if (this.field.panel.collides(x,y)) {
 			this.field.panel.trigger(x,y);
 		} else if (this.bar.panel.collides(x,y)) {
