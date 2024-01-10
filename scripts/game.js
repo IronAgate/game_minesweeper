@@ -1,5 +1,7 @@
 const DBLT = 300;
 const BGC = "#324056";
+const FGC = "#557185";
+const TXC = "#ffd079";
 const SPSZ = 8;
 const IM = {
 	blank:10,
@@ -13,9 +15,10 @@ const IM = {
 class GameController {
 	constructor(renderController, fieldWidth,fieldDepth, mineCount) {
 		
+		
+		
 		this.renderController = renderController;
 		
-		//bad practice?
 		renderController.eisel.setColor(BGC);
 		renderController.eisel.clear();
 		
@@ -28,7 +31,7 @@ class GameController {
 			this,
 			25,0,
 			this.renderController.width - 50,
-				(this.renderController.width - 50)/8
+				(this.renderController.width - 50)/fieldWidth
 		);
 		this.bar = new Bar(
 			barPanel,
@@ -59,21 +62,40 @@ class GameController {
 	ignite() {
 		this.field.terraform();
 		this.bar.terraform();
+		this.paused = false;
 		this.present();
 	}
 	present() {
 		this.eisel.presentFill(this.renderController.eisel);
-		//this.eisel.setColor(BGC); since minesweeper is simple, dont need to clear
-		//this.eisel.clear();
 	};
 	onUp([x,y]) {
 		//detect collision, send to appropriate panel
 		
-		this.field.panel.trigger(x,y);
-		
+		if (this.paused) {
+			this.pauseMenu.panel.trigger(x,y);
+		} else if (this.field.panel.collides(x,y)) {
+			this.field.panel.trigger(x,y);
+		} else if (this.bar.panel.collides(x,y)) {
+			this.bar.panel.trigger(x,y);
+		}
 		
 		//finally
 		this.present();
+	}
+	
+	pause() {
+		this.paused = true;
+		this.pauseMenu = new PauseMenu(this);
+	}
+	resume() {
+		this.pauseMenu = null;
+		this.paused = false;
+		
+		this.eisel.setColor(BGC);
+		this.eisel.clear();
+		
+		this.field.panel.present();
+		this.bar.panel.present();
 	}
 }
 
@@ -102,7 +124,7 @@ class GamePanel {
 		[x,y] = this.eisel.translateCanvasApp(x,y);
 		
 		this.content.trigger(x,y);
-		this.present();
+		//this.present();
 	}
 	present() {
 		this.eisel.present(
@@ -295,6 +317,7 @@ class Minefield {
 		}
 		this.lastTap = [now, x,y];
 		
+		this.panel.present();
 	}
 	
 	drawTile(index, x,y) {
@@ -305,11 +328,14 @@ class Minefield {
 		);
 	}
 	
+	
+	
 }
 
 class Bar {
 	constructor(panel,sheet, width, flags) {
 		this.panel = panel;
+		panel.content = this;
 		panel.eisel.scaleFit(width, 1);
 		
 		this.sheet = sheet;
@@ -349,11 +375,17 @@ class Bar {
 		} else {
 			this.drawTile(fs[0], 2);
 			this.drawTile(fs[1], 3);
-		}
+		}//cant show more than 99 flags
 		
 		this.panel.present();
 	}
-	
+	trigger(x,_) {
+		x = Math.floor(x);
+		
+		if (x === this.width-2) { //burger btn
+			this.panel.controller.pause();
+		}
+	}
 	drawTile(index, x) {
 		this.panel.eisel.paintSprite(
 			index,
@@ -361,4 +393,83 @@ class Bar {
 			x,0
 		);
 	}
+}
+
+class PauseMenu {
+	constructor(controller) {
+
+		this.panel = new GamePanel(
+			controller,
+			0,0,
+			controller.renderController.width,
+				controller.renderController.depth
+		);
+		this.panel.content = this;
+		
+		const btnCount = 3;
+		
+		const w = this.panel.eisel.getWidth();
+		const d = this.panel.eisel.getDepth();
+		
+		const bX = w * 0.05;
+		const bWidth = w - bX*2;
+		
+		const bY = d * 0.05;
+		const bDepth = ((d-bY*2) * 0.95) / btnCount;
+		
+		const bSpacing = ((d-bY*2) * 0.05) / btnCount;
+		
+		this.bX = bX;
+		this.bWidth = bWidth;
+		this.bY = bY;
+		this.bDepth = bDepth;
+		this.bSpacing = bSpacing;
+		this.drawnBs = 0;
+		
+		this.panel.eisel.setColor(BGC);
+		this.panel.eisel.clear();
+		
+		this.drawButton("reset", this.reset);
+		this.drawButton("home", this.home);
+		this.drawButton("resume", this.resume);
+		
+		this.panel.present();
+	}
+	drawButton(text) {
+		
+		const e = this.panel.eisel;
+		
+		e.setColor(FGC);
+		e.paintRectangle(
+			this.bX,
+				this.bY + (this.bDepth + this.bSpacing) * this.drawnBs,
+			this.bWidth, this.bDepth
+			)
+		
+		e.setColor(TXC);
+		e.setFont(this.bDepth*0.5);
+		e.write(
+			text,
+			this.bX*1.5,
+				(this.bY + (this.bDepth + this.bSpacing) * this.drawnBs) + this.bDepth*0.75,
+			this.bWidth
+		);
+		
+		this.drawnBs++;
+	}
+	
+	trigger(x,y) {
+		this.resume();
+	}
+	
+	reset() {
+		
+	}
+	home() {
+		
+	}
+	resume() {
+		this.panel.controller.resume();
+	}
+	
 }

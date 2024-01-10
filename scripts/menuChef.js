@@ -38,10 +38,12 @@ class Chef {
 		
 		for (let i = 0; i < contents.length; i++) {
 			
+			//set for collision
 			contents[i].x = startX;
 			contents[i].y = startY + (depth + spacing) * i;
 			contents[i].endX = startX + width;
 			contents[i].endY = (startY + (depth + spacing) * i) + depth;
+			
 			
 			frame.setColor(this.ms["style"].fgColor);
 			frame.paintRectangle(

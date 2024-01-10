@@ -138,7 +138,6 @@ class Eisel { //abstract canvas handler
 	//images
 	paintFromRegion(image, sx,sy, swidth,sheight, dx,dy, dwidth,dheight) {
 		[dx,dy] = this.translateAppCanvas(dx,dy);
-		//[dwidth,dheight] = this.translateAppCanvas(dwidth,dheight);
 		dwidth = Math.ceil(dwidth * this.scale);
 		dheight = Math.ceil(dheight * this.scale);
 		this.context.drawImage(
@@ -163,7 +162,6 @@ class Eisel { //abstract canvas handler
 	}
 	paintImage(image, x,y, width,height) {
 		[x,y] = this.translateAppCanvas(x,y);
-		//[width,height] = this.translateAppCanvas(width,height);
 		width = Math.ceil(width * this.scale);
 		height = Math.ceil(height * this.scale);
 		this.context.drawImage(
@@ -179,8 +177,7 @@ class Eisel { //abstract canvas handler
 	}
 	write(text, x,y, width) {
 		[x,y] = this.translateAppCanvas(x,y);
-		let _; //todo: so dont need this workaround
-		[width,_] = this.translateAppCanvas(width,0); //todo
+		width = Math.ceil(width * this.scale);
 		this.context.fillText(
 			text,
 			x,y,
@@ -205,7 +202,7 @@ class Eisel { //abstract canvas handler
 		);
 	}
 }
-class DisplayEisel extends Eisel { //abstract
+class DisplayEisel extends Eisel { 
 	constructor(width, depth) {
 		super(
 			document.createElement("canvas")

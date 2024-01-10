@@ -1,19 +1,31 @@
-
-organize
-
+priorities
+	reset game
+	gamepanel positioning/sizing
+	
 
 proper end screen
 	for victory
 	for loss, if insta-death
 	time at completion - time at layMines
 	
+finish menus
+	
 settings
+	insta-death
+	mobile/mouse controls?
+		larger undertaking itself though
+	toggle field resizing
 
 fullscreen
+	resize field like google play ver
+	changing canv html size
 
-misc messiness
+browsers
+	ensure cross compatibility
+	css properties to fix stuff
+	see how fullscreen impacts first
 
-	rename 'resX/Y' to width/depth in renderer
+minor details
 	squares should iterate through neighbors only once, where applicable,
 	 rather than multiple times
 
