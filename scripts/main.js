@@ -1,10 +1,14 @@
 
 function startup(renderController) {
 	
-	new Chef(renderController, tempMenuStr).ignite();
+	
+	
+	new Chef(
+		renderController
+		, new Waiter(renderController)
+		, tempMenuStr
+	);
 	
 }
 
-new RenderController("game", 500,500).ignite(startup);
-
-
+new RenderController("game", 500,500, startup);

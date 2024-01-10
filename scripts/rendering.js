@@ -1,20 +1,9 @@
 
 class RenderController {
 	
-	constructor(divId, width,depth) {
+	constructor(divId, width,depth, startup) {
+		
 		this.div = document.getElementById(divId);
-		
-		if (this.div === null) {
-			throw new Error("| RenderController failed to locate '" + divId + "' div.");
-		}
-		
-		this.width = width;
-		this.depth = depth;
-		
-		this.eisel = new DisplayEisel(width,depth);
-		this.scale = 1;
-		
-		
 		
 		//essential css rules
 		//disable scroll-to-refresh / needs both for diff browsers
@@ -26,12 +15,15 @@ class RenderController {
 		this.div.style.aspectRatio = width/depth;
 		
 		
+		if (this.div === null) {
+			throw new Error("| RenderController failed to locate '" + divId + "' div.");
+		}
 		
-	}
-	ignite(funcCall) {
-		//todo: initiate inputHandler here and use that instead
+		this.eisel = new DisplayEisel(width,depth);
+		
 		this.input = new InputHandler(this.eisel);
-		//create start button
+		
+		//create the 'start' button at beginning
 		const btn = document.createElement("button");
 		btn.textContent = "start";
 		btn.id = "startButton";
@@ -40,29 +32,29 @@ class RenderController {
 		const rc = this;
 		btn.onclick = 
 			function() {
-				rc.eisel.addSelf(rc.div);
+				rc.eisel.appendSelf(rc.div);
 				this.remove();
 				
-				funcCall(rc);
+				startup(rc);
 			}
 		this.div.appendChild(btn);
 	}
-	createFullEisel() {
-		return new OffscreenEisel(this.width,this.depth);
+	newFrame() {
+		return new OffscreenEisel(this.eisel.getWidth(), this.eisel.getHeight());
 	}
 }
-
-class InputHandler {
+class InputHandler { //PROBLEM: accesses eisel's "private" canvas
 	constructor(rootEisel) {
 		this.rootEisel = rootEisel;
 	}
 	translateClientApp(x,y) {
-		const rect = this.rootEisel.canvas.getBoundingClientRect();
+		const c = this.rootEisel.getCanvas();
+		const rect = c.getBoundingClientRect();
 		[x,y] = [ //translate client to canv
-			(x - rect.left) * (this.rootEisel.canvas.width / this.rootEisel.canvas.offsetWidth)
-			, (y- rect.top) * (this.rootEisel.canvas.height / this.rootEisel.canvas.offsetHeight)
+			(x - rect.left) * (c.width / c.offsetWidth)
+			, (y- rect.top) * (c.height / c.offsetHeight)
 		];
-		return this.rootEisel.translateCanvasApp(x,y);
+		return this.rootEisel.unscale(x,y);
 	}
 	
 	//subject to change for proper touch events
@@ -71,158 +63,169 @@ class InputHandler {
 		this.downCall = function(e) {
 			object.onDown(i.translateClientApp(e.clientX,e.clientY));
 		}
-		this.rootEisel.canvas.addEventListener("mousedown", this.downCall);
+		this.rootEisel.getCanvas().addEventListener("mousedown", this.downCall);
 	}
 	recieveUp(object) {
 		const i = this;
 		this.upCall = function(e) {
 			object.onUp(i.translateClientApp(e.clientX,e.clientY));
 		}
-		this.rootEisel.canvas.addEventListener("mouseup", this.upCall);
+		this.rootEisel.getCanvas().addEventListener("mouseup", this.upCall);
 	}
 	forgetDown() {
-		this.rootEisel.canvas.removeEventListener("mousedown", this.downCall);
+		this.rootEisel.getCanvas().removeEventListener("mousedown", this.downCall);
 		this.downCall = null;
 	}
 	forgetUp() {
-		this.rootEisel.canvas.removeEventListener("mouseup", this.upCall);
+		this.rootEisel.getCanvas().removeEventListener("mouseup", this.upCall);
 		this.upCall = null;
 	}
 	
 }
-
-class Eisel { //abstract canvas handler
-	constructor(canvas) {
-		this.canvas = canvas;
-		this.scale = 1;
+class Eisel { //abstract
+	constructor(canvas, scale=1) {
+		this._canvas = canvas;
+		this._scale = scale;
 		
-		this.context = this.canvas.getContext("2d");
+		this._context = this._canvas.getContext("2d");
 		//for pixel art
-		this.context.imageSmoothingEnabled = false;
-		this.context.webkitImageSmoothingEnabled = false;
-		this.context.mozImageSmoothingEnabled = false;
+		this._context.imageSmoothingEnabled = false;
+		this._context.webkitImageSmoothingEnabled = false;
+		this._context.mozImageSmoothingEnabled = false;
 	}
 	setScale(newScale) {
-		this.scale = newScale;
+		this._scale = newScale;
 	}
-	scaleFit(x,y) {
-		if (Math.abs(x - this.canvas.width) >= Math.abs(y - this.canvas.height)) {
-			this.scale = this.canvas.width / x;
+	setScaleFit(width,height) {
+		//scale so something of specified height/width will fit within canvas
+		[width,height] = this._scaleSize(width,height);
+		
+		if (Math.abs(width - this._canvas.width) >= Math.abs(height - this._canvas.height)) {
+			this._scale = this._canvas.width / width;
 		} else {
-			this.scale = this.canvas.height / y;
+			this._scale = this._canvas.height / height;
 		}
 	}
 	getWidth() {
-		return this.canvas.width;
+		return this._canvas.width;
 	}
-	getDepth() {
-		return this.canvas.height;
+	getHeight() {
+		return this._canvas.height;
 	}
-	translateAppCanvas(x,y) {
-		return [Math.floor(x * this.scale), Math.floor(y * this.scale)]
+	getCanvas() {
+		return this._canvas;
 	}
-	translateCanvasApp(x,y) {
-		return [x / this.scale, y / this.scale]
+	unscale(x,y) {
+		return [x/this._scale, y/this._scale];
 	}
-	setColor(color_hexadecimal) {
-		this.context.fillStyle = color_hexadecimal;
+	_scalePos(x,y) {
+		return [
+			Math.floor(x * this._scale)
+			, Math.floor(y * this._scale)
+		];
+	}
+	_scaleSize(w,h) {
+		return [
+			Math.ceil(w * this._scale)
+			, Math.ceil(h * this._scale)
+		];
+	}
+	
+	//basic drawing
+	color(colorHex) {
+		this._context.fillStyle = colorHex;
 	}
 	clear() {
-		this.context.fillRect(0,0, this.canvas.width,this.canvas.height);
+		this._context.fillRect(0,0, this._canvas.width,this._canvas.height);
 	}
-	paintRectangle(x,y, width,depth) {
-		[x,y] = this.translateAppCanvas(x,y);
-		[width,depth] = this.translateAppCanvas(width,depth);
-		this.context.fillRect(x,y, width,depth);
+	paintRectangle(x,y, w,h) {
+		[x,y] = this._scalePos(x,y);
+		[w,h] = this._scaleSize(w,h);
+		this._context.fillRect(x,y, w,h);
 	}
+	
 	//images
-	paintFromRegion(image, sx,sy, swidth,sheight, dx,dy, dwidth,dheight) {
-		[dx,dy] = this.translateAppCanvas(dx,dy);
-		dwidth = Math.ceil(dwidth * this.scale);
-		dheight = Math.ceil(dheight * this.scale);
-		this.context.drawImage(
-			image,
-			sx,sy,
-			swidth,sheight,
-			dx,dy,
-			dwidth,dheight
-		);			
+	paintFromRegion(image, sx,sy, sw,sh, dx,dy, dw,dh) {
+		[dx,dy] = this._scalePos(dx,dy);
+		[dw, dh] = this._scaleSize(dw,dh);
+		this._context.drawImage(
+			image
+			, sx,sy
+			, sw,sh
+			, dx,dy
+			, dw,dh
+		);
 	}
-	paintSprite(index, sheet, spriteSize, dx,dy, dwidth = 1,dheight = 1) {
+	paintSprite(index, sheet, spriteSize, dx,dy, dw=1,dh=1) {
 		index *= spriteSize;
-		const sx = index % sheet.width
+		const sx = index % sheet.width;
 		const sy = Math.floor(index / sheet.width) * spriteSize;
 		this.paintFromRegion(
-			sheet,
-			sx,sy,
-			spriteSize,spriteSize,
-			dx,dy,
-			dwidth,dheight
+			sheet
+			, sx,sy
+			, spriteSize,spriteSize
+			, dx,dy
+			, dw,dh
 		);
 	}
-	paintImage(image, x,y, width,height) {
-		[x,y] = this.translateAppCanvas(x,y);
-		width = Math.ceil(width * this.scale);
-		height = Math.ceil(height * this.scale);
-		this.context.drawImage(
-			image,
-			x,y,
-			width,height
+	paintImage(image, x,y, w,h) {
+		[x,y] = this._scalePos(x,y);
+		[w, h] = this._scaleSize(w,h);
+		this._context.drawImage(
+			image
+			, x,y
+			, w,h
 		);
-	};
+	}
 	
 	//text
-	setFont(size, style="monospace") {
-		this.context.font = String(size) + "px " + style;
+	font(size, style="monospace") {
+		this._context.font = String(size) + "px " + style;
 	}
-	write(text, x,y, width) {
-		[x,y] = this.translateAppCanvas(x,y);
-		width = Math.ceil(width * this.scale);
-		this.context.fillText(
-			text,
-			x,y,
-			width
+	write(text, x,y, w) {
+		[x,y] = this._scalePos(x,y);
+		let _;
+		[w,_] = this._scaleSize(w);
+		this._context.fillText(
+			text
+			, x,y
+			, w
 		);
 	}
 	
 	//inter-eisel
-	present(destinationEisel, x,y, width,depth) {
-		destinationEisel.paintImage(
-			this.canvas,
-			x,y,
-			width,depth
+	display(originEisel) {
+		this.paintImage(
+			originEisel.getCanvas()
+			, 0,0
+			, this._canvas.width, this._canvas.height
 		);
 	}
-	presentFill(destinationEisel) {
-		destinationEisel.context.drawImage(
-			this.canvas,
-			0,0,
-			destinationEisel.canvas.width,
-				destinationEisel.canvas.height
-		);
-	}
+	
 }
-class DisplayEisel extends Eisel { 
-	constructor(width, depth) {
+class DisplayEisel extends Eisel {
+	constructor(width,height, scale=1) {
 		super(
 			document.createElement("canvas")
+			, scale
 		);
 		
-		this.canvas.width = width;
-		this.canvas.height = depth;
+		this._canvas.width = width;
+		this._canvas.height = height;
 		
-		this.canvas.style.width = "100%";
-		this.canvas.style.height = "100%";
-		
+		this._canvas.style.width = "100%";
+		this._canvas.style.height = "100%";
 	}
-	addSelf(element) {
-		element.appendChild(this.canvas);
+	appendSelf(element) {
+		element.appendChild(this._canvas);
 	}
 }
 class OffscreenEisel extends Eisel {
-	constructor(width, depth) {
+	constructor(width,height, scale=1) {
 		super(
-			new OffscreenCanvas(width, depth)
+			new OffscreenCanvas(width, height)
+			, scale
 		);
+		
 	}
 }
