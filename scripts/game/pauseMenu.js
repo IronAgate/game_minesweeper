@@ -13,7 +13,7 @@ class PauseMenu {
 		this.panel.content = this;
 		
 		this.btns = [];
-		const btnCount = 3;
+		const btnCount = 2;
 		
 		const w = this.panel.eisel.getWidth();
 		const d = this.panel.eisel.getHeight();
@@ -37,8 +37,8 @@ class PauseMenu {
 		this.panel.eisel.clear();
 		
 		this.drawButton("reset", this.reset);
-		this.drawButton("home", this.home);
-		this.drawButton("resume", this.resume);
+		this.drawButton("quit", this.home);
+		//this.drawButton("resume", this.resume);
 		
 		this.panel.present();
 	}
@@ -75,7 +75,6 @@ class PauseMenu {
 	}
 	
 	trigger(x,y) {
-		console.log(x,y);
 		for (let i = this.btns.length-1; i >= 0; i--) {
 			const xdif = x - this.bX;
 			const ydif = y - this.btns[i].y;

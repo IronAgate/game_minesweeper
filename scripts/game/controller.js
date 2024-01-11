@@ -39,7 +39,7 @@ class GameController {
 		this.bar = new Bar(
 			barPanel,
 			sheet,
-			fieldWidth, mineCount
+			8, mineCount
 		);
 		
 		
@@ -110,8 +110,13 @@ class GameController {
 		this.bar.panel.present();
 	}
 	exit() {
-		startup(this._renderController);
 		this.doExit = true;
+		new Chef(
+			this._renderController
+			, new Waiter(this._renderController)
+			, tempMenuStr
+			, "play"
+		);
 	}
 	reset() {
 		this.doExit = true;

@@ -22,7 +22,7 @@ class RenderController {
 		this.eisel = new DisplayEisel(width,depth);
 		
 		this.input = new InputHandler(this.eisel);
-		
+		/*
 		//create the 'start' button at beginning
 		const btn = document.createElement("button");
 		btn.textContent = "start";
@@ -38,6 +38,9 @@ class RenderController {
 				startup(rc);
 			}
 		this.div.appendChild(btn);
+		*/
+		this.div.appendChild(this.eisel.getCanvas())
+		startup(this);
 	}
 	newFrame() {
 		return new OffscreenEisel(this.eisel.getWidth(), this.eisel.getHeight());
@@ -110,7 +113,7 @@ class Eisel { //abstract
 		//scale so something of specified height/width will fit within canvas
 		[width,height] = this._scaleSize(width,height);
 		
-		if (Math.abs(width - this._canvas.width) >= Math.abs(height - this._canvas.height)) {
+		if (Math.abs(width - this._canvas.width) <= Math.abs(height - this._canvas.height)) {
 			this._scale = this._canvas.width / width;
 		} else {
 			this._scale = this._canvas.height / height;

@@ -45,7 +45,7 @@ class Chef {
 			this._eisel.paintRectangle(bx,by, bw,bh);
 			
 			this._eisel.color(this._menuData.style.textColor);
-			this._eisel.font(bh*0.5);
+			this._eisel.font(bh*0.4);
 			this._eisel.write(
 				contents[i].text
 				, bx * 1.50
@@ -104,9 +104,9 @@ const tempMenuStr = `
 			, "type": 0
 			, "menu": "play"
 		}, {
-			"text": "help"
-			, "type": 2
-			, "link": ""
+			"text": "settings"
+			, "type": 0
+			, "menu": "settings"
 		}
 	]
 }
@@ -127,20 +127,12 @@ const tempMenuStr = `
 			, "type": 1
 			, "f": "play(19,19,75)"
 		}, {
-			"text": "mega"
-			, "type": 1
-			, "f": "playMega()"
-		}, {
 			"text": "<- back"
 			, "type": 0
 			, "menu": "home"
 		}
 	]
 }
-
-}
-`
-/*
 , "settings": {
 	
 	
@@ -168,4 +160,3 @@ const tempMenuStr = `
 
 }
 `
-*/
