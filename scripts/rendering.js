@@ -59,6 +59,11 @@ class InputHandler { //PROBLEM: accesses eisel's "private" canvas
 	
 	//subject to change for proper touch events
 	recieveDown(object) {
+		
+		if (this.downCall != null) {
+			this.forgetDown();
+		}
+		
 		const i = this;
 		this.downCall = function(e) {
 			object.onDown(i.translateClientApp(e.clientX,e.clientY));
@@ -66,6 +71,11 @@ class InputHandler { //PROBLEM: accesses eisel's "private" canvas
 		this.rootEisel.getCanvas().addEventListener("mousedown", this.downCall);
 	}
 	recieveUp(object) {
+		
+		if (this.upCall != null) {
+			this.forgetUp();
+		}
+		
 		const i = this;
 		this.upCall = function(e) {
 			object.onUp(i.translateClientApp(e.clientX,e.clientY));

@@ -12,6 +12,7 @@ class PauseMenu {
 		);
 		this.panel.content = this;
 		
+		this.btns = [];
 		const btnCount = 3;
 		
 		const w = this.panel.eisel.getWidth();
@@ -43,12 +44,21 @@ class PauseMenu {
 	}
 	drawButton(text, f) {
 		
+		const specificY = this.bY + (this.bHeight + this.bSpacing) * this.drawnBs;
+		
+		//save for collision
+		const btn = {
+			f: f,
+			y: specificY,
+		};
+		this.btns.push(btn);
+		
 		const e = this.panel.eisel;
 		
 		e.color(FGC);
 		e.paintRectangle(
 			this.bX,
-				this.bY + (this.bHeight + this.bSpacing) * this.drawnBs,
+				specificY,//this.bY + (this.bHeight + this.bSpacing) * this.drawnBs,
 			this.bWidth, this.bHeight
 			)
 		
@@ -65,14 +75,27 @@ class PauseMenu {
 	}
 	
 	trigger(x,y) {
-		this.resume();
+		console.log(x,y);
+		for (let i = this.btns.length-1; i >= 0; i--) {
+			const xdif = x - this.bX;
+			const ydif = y - this.btns[i].y;
+			if (
+				(ydif >= 0 && ydif <= this.bHeight)
+				&& (xdif >= 0 && xdif <= this.bWidth)
+			) {
+				this.runme = this.btns[i].f;
+				this.runme(this);
+				delete this.runme;
+				return
+			}
+		}
 	}
 	
 	reset() {
-		
+		this.panel.game.reset();
 	}
 	home() {
-		
+		this.panel.game.exit();
 	}
 	resume() {
 		this.panel.game.resume();

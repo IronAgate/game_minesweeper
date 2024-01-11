@@ -1,6 +1,6 @@
 const DBLT = 300;
 const BGC = "#324056";
-const FGC = "#557185";
+const FGC = "#557185";//used in pause menu
 const TXC = "#ffd079";
 const SPRSZ = 8;
 const IM = {
@@ -19,6 +19,11 @@ class GameController {
 		
 		renderController.input.recieveUp(this);
 		
+		//for reset
+		this.w = fieldWidth;
+		this.h = fieldHeight;
+		this.m = mineCount;
+		
 		this.eisel = renderController.newFrame();
 		
 		const sheet = document.getElementById("game_sheet");
@@ -28,7 +33,7 @@ class GameController {
 		const barPanel = new GamePanel(
 			this,
 			25,0,
-			this._renderController.eisel.getWidth() - 50,
+			this._renderController.eisel.getWidth() - 50, //something is wrond here
 				(this._renderController.eisel.getWidth() - 50)/fieldWidth
 		);
 		this.bar = new Bar(
@@ -76,10 +81,15 @@ class GameController {
 			} else {
 				this.resume();
 			}
+			
 		} else if (this.field.panel.collides(x,y)) {
 			this.field.panel.trigger(x,y);
 		} else if (this.bar.panel.collides(x,y)) {
 			this.bar.panel.trigger(x,y);
+		}
+		
+		if (this.doExit) {
+			return;
 		}
 		
 		//finally
@@ -98,6 +108,14 @@ class GameController {
 		
 		this.field.panel.present();
 		this.bar.panel.present();
+	}
+	exit() {
+		startup(this._renderController);
+		this.doExit = true;
+	}
+	reset() {
+		this.doExit = true;
+		new GameController(this._renderController, this.w,this.h,this.m);
 	}
 }
 
